@@ -15,23 +15,11 @@ import {
   demoSimilarProperties,
   type DemoSearchResult,
 } from "./demo-store";
-
-/**
- * Capa de acceso a propiedades. Hoy sirve datos demo en memoria; cuando
- * `isSupabaseConfigured`, cada función consultará `property_summaries` / `properties`
- * (misma firma pública, sin tocar las rutas).
- */
-
-export const getFeaturedProperties = cache(async (limit = 8): Promise<PropertySummary[]> => {
-  if (isSupabaseConfigured) {
-    // TODO(fase 1): SELECT * FROM property_summaries WHERE status='PUBLISHED' ORDER BY is_featured DESC, published_at DESC
-  }
-  return demoFeaturedProperties(limit);
-});
-
-export const getNewProperties = cache(async (limit = 8): Promise<PropertySummary[]> => {
-  return demoNewProperties(limit);
-});
+import {
+  sbGetFeaturedProperties,
+  sbGetPropertyBySlug,
+  sbSearchProperties,
+} from "./supabase/properties";
 
 export interface PropertySearchResponse {
   items: PropertySummary[];
@@ -40,9 +28,25 @@ export interface PropertySearchResponse {
   mapPoints: DemoSearchResult["mapPoints"];
 }
 
+export const getFeaturedProperties = cache(async (limit = 8): Promise<PropertySummary[]> => {
+  if (isSupabaseConfigured) {
+    const rows = await sbGetFeaturedProperties(limit);
+    if (rows && rows.length) return rows;
+  }
+  return demoFeaturedProperties(limit);
+});
+
+export const getNewProperties = cache(async (limit = 8): Promise<PropertySummary[]> => {
+  return demoNewProperties(limit);
+});
+
 export async function searchProperties(
   params: ParsedPropertySearchParams,
 ): Promise<PropertySearchResponse> {
+  if (isSupabaseConfigured) {
+    const result = await sbSearchProperties(params);
+    if (result) return result;
+  }
   const result = demoSearchProperties(params);
   return {
     items: result.items,
@@ -53,6 +57,10 @@ export async function searchProperties(
 }
 
 export const getPropertyBySlug = cache(async (slug: string): Promise<Property | null> => {
+  if (isSupabaseConfigured) {
+    const property = await sbGetPropertyBySlug(slug);
+    if (property !== undefined) return property; // null => 404 real; objeto => encontrado
+  }
   return demoPropertyBySlug(slug);
 });
 
