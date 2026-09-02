@@ -11,7 +11,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import postgres from "postgres";
-import { getDbUrl, loadEnv } from "./_env.js";
+import { getDbUrl, loadEnv } from "./_env";
 
 loadEnv();
 

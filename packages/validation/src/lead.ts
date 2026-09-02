@@ -8,7 +8,7 @@ import {
   messageSchema,
   optionalEmailSchema,
   phoneDoSchema,
-} from "./primitives.js";
+} from "./primitives";
 
 export const LEAD_INTENT = z.enum(["info", "visit", "financing", "callback"]);
 

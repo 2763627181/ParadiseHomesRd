@@ -5,9 +5,9 @@ import type {
   PropertyStatus,
   PropertyType,
 } from "@paradise/config";
-import type { ImageAsset, ISODateString, Money, UUID, VideoAsset } from "./common.js";
-import type { PropertyLocation } from "./location.js";
-import type { AgencySummary, AgentSummary } from "./people.js";
+import type { ImageAsset, ISODateString, Money, UUID, VideoAsset } from "./common";
+import type { PropertyLocation } from "./location";
+import type { AgencySummary, AgentSummary } from "./people";
 
 export interface PropertyFeature {
   key: string;

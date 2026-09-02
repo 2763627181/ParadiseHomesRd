@@ -12,7 +12,7 @@ import {
   type Currency,
   type OperationType,
   type PropertyType,
-} from "./enums.js";
+} from "./enums";
 
 export const OPERATION_LABELS: Record<OperationType, string> = {
   [OPERATION_TYPE.SALE]: "Comprar",

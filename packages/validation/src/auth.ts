@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema, fullNameSchema, optionalPhoneDoSchema } from "./primitives.js";
+import { emailSchema, fullNameSchema, optionalPhoneDoSchema } from "./primitives";
 
 export const passwordSchema = z
   .string({ error: "Ingresa tu contraseña" })

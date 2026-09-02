@@ -1,5 +1,5 @@
 import type { OrgMemberRole, UserRole } from "@paradise/config";
-import type { ISODateString, UUID } from "./common.js";
+import type { ISODateString, UUID } from "./common";
 
 export interface Profile {
   id: UUID;

@@ -4,7 +4,7 @@ export type {
   Tables,
   TablesInsert,
   Views,
-} from "./database.types.js";
+} from "./database.types";
 
 export {
   demoAgencies,
@@ -14,6 +14,6 @@ export {
   demoProperties,
   demoPropertySummaries,
   DEMO_SUMMARY,
-} from "./seed-data.js";
+} from "./seed-data";
 
 export const MIGRATIONS_DIR = "migrations";

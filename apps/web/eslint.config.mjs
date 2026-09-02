@@ -1,27 +1,20 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
+import next from "eslint-config-next";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
-
+/** @type {import('eslint').Linter.Config[]} */
 const config = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...next,
   {
-    ignores: [".next/**", "node_modules/**", "src/components/ui/**"],
+    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "src/components/ui/**"],
   },
   {
+    files: ["**/*.ts", "**/*.tsx"],
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      "@typescript-eslint/consistent-type-imports": [
-        "warn",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" },
-      ],
+      // Patrones legítimos de sincronización (hydration guard, cerrar UI al navegar).
+      "react-hooks/set-state-in-effect": "off",
     },
   },
 ];

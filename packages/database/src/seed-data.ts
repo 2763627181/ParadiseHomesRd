@@ -32,7 +32,7 @@ import {
   INTERIOR_PHOTOS,
   PROJECT_PHOTOS,
   pickImages,
-} from "./seed-images.js";
+} from "./seed-images";
 
 // ── PRNG determinista ──────────────────────────────────────────────────────
 function mulberry32(seed: number) {

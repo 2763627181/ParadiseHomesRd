@@ -1,11 +1,11 @@
-export type * from "./common.js";
-export type * from "./location.js";
-export type * from "./people.js";
-export type * from "./property.js";
-export type * from "./project.js";
-export type * from "./lead.js";
-export type * from "./search.js";
-export type * from "./dashboard.js";
+export type * from "./common";
+export type * from "./location";
+export type * from "./people";
+export type * from "./property";
+export type * from "./project";
+export type * from "./lead";
+export type * from "./search";
+export type * from "./dashboard";
 
 // Re-export de enums de dominio para un único punto de importación en apps.
 export {

@@ -11,7 +11,7 @@ import { execFileSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFileSync } from "node:fs";
-import { loadEnv } from "./_env.js";
+import { loadEnv } from "./_env";
 
 loadEnv();
 

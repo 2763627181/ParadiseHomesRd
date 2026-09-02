@@ -9,7 +9,7 @@
  * tabla `locations` (se puebla desde aquí en el seed).
  */
 
-import { LOCATION_TYPE, type LocationType } from "./enums.js";
+import { LOCATION_TYPE, type LocationType } from "./enums";
 
 export interface LocationNode {
   slug: string;

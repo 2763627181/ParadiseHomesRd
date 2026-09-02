@@ -7,7 +7,7 @@ import {
   optionalPhoneDoSchema,
   phoneDoSchema,
   urlSchema,
-} from "./primitives.js";
+} from "./primitives";
 
 export const PARTNER_TYPE = z.enum([
   "agency",

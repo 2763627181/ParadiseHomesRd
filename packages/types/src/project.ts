@@ -1,7 +1,7 @@
 import type { Currency, ProjectStatus, PropertyType, UnitStatus } from "@paradise/config";
-import type { ImageAsset, ISODateString, Money, UUID, VideoAsset } from "./common.js";
-import type { PropertyLocation } from "./location.js";
-import type { Developer, DeveloperSummary } from "./people.js";
+import type { ImageAsset, ISODateString, Money, UUID, VideoAsset } from "./common";
+import type { PropertyLocation } from "./location";
+import type { Developer, DeveloperSummary } from "./people";
 
 export interface ProjectSummary {
   id: UUID;

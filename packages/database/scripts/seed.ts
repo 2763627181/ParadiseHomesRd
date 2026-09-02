@@ -15,8 +15,8 @@ import {
   demoProjects,
   demoProperties,
   DEMO_SUMMARY,
-} from "../src/seed-data.js";
-import { getDbUrl, loadEnv } from "./_env.js";
+} from "../src/seed-data";
+import { getDbUrl, loadEnv } from "./_env";
 
 loadEnv();
 

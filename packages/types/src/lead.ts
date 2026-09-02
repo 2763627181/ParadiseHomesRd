@@ -7,7 +7,7 @@ import type {
   VisitStatus,
 } from "@paradise/config";
 import type { AttributionSnapshot } from "@paradise/utils/attribution";
-import type { ISODateString, UUID } from "./common.js";
+import type { ISODateString, UUID } from "./common";
 
 export interface Contact {
   id: UUID;

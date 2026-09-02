@@ -1,5 +1,5 @@
 import type { LocationType } from "@paradise/config";
-import type { UUID } from "./common.js";
+import type { UUID } from "./common";
 
 export interface Location {
   id: UUID;

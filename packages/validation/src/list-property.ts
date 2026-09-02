@@ -8,7 +8,7 @@ import {
   optionalPhoneDoSchema,
   phoneDoSchema,
   propertyTypeSchema,
-} from "./primitives.js";
+} from "./primitives";
 
 /**
  * Wizard `/list-property` — 8 pasos. Cada paso valida su parte; el submit final

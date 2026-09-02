@@ -5,8 +5,8 @@ import type {
   PropertyType,
 } from "@paradise/config";
 import type { Bounds } from "@paradise/utils/geo";
-import type { Paginated } from "./common.js";
-import type { PropertySummary } from "./property.js";
+import type { Paginated } from "./common";
+import type { PropertySummary } from "./property";
 
 export type SortOption =
   | "relevance"

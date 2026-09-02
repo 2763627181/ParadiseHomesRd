@@ -4,7 +4,7 @@ import {
   currencySchema,
   operationTypeSchema,
   propertyTypeSchema,
-} from "./primitives.js";
+} from "./primitives";
 
 /**
  * Lista separada por comas (o repetida) → array de strings.

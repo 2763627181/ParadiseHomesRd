@@ -1,5 +1,5 @@
 import type { LeadStatus } from "@paradise/config";
-import type { ISODateString } from "./common.js";
+import type { ISODateString } from "./common";
 
 export interface StatCard {
   key: string;
