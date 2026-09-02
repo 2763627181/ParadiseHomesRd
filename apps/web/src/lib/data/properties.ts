@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import type { Paginated, Property, PropertySummary } from "@paradise/types";
+import type { Property, PropertySummary } from "@paradise/types";
 import type { ParsedPropertySearchParams } from "@paradise/validation";
 
 import { isSupabaseConfigured } from "@/lib/env";
@@ -33,7 +33,10 @@ export const getNewProperties = cache(async (limit = 8): Promise<PropertySummary
   return demoNewProperties(limit);
 });
 
-export interface PropertySearchResponse extends Paginated<PropertySummary> {
+export interface PropertySearchResponse {
+  items: PropertySummary[];
+  total: number;
+  nextCursor: string | null;
   mapPoints: DemoSearchResult["mapPoints"];
 }
 

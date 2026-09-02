@@ -37,10 +37,13 @@ export async function getSupabaseServerClient(): Promise<SupabaseClient<Database
 /**
  * Cliente con service role — OMITE RLS. Solo para operaciones de backend
  * controladas (crear leads, escribir analítica, moderación). Nunca en el cliente.
+ *
+ * Sin tipar con `Database` a propósito: se usa para escrituras puntuales y los
+ * tipos generados aún no existen (se regeneran con `pnpm db:types`).
  */
-export function getSupabaseAdminClient(): SupabaseClient<Database> | null {
+export function getSupabaseAdminClient(): SupabaseClient | null {
   if (!isSupabaseConfigured || !serverEnv.SUPABASE_SERVICE_ROLE_KEY) return null;
-  return createClient<Database>(env.SUPABASE_URL!, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
+  return createClient(env.SUPABASE_URL!, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
