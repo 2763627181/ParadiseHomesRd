@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { PropertyFilters } from "@/components/property/property-filters";
 import { PropertyResults } from "@/components/property/property-results";
 import { ResultsToolbar } from "@/components/property/results-toolbar";
+import { MapSearchView } from "@/components/map/map-search-view";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -37,8 +38,10 @@ export default async function PropertiesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const params = parseSearchParams(await searchParams);
+  const raw = await searchParams;
+  const params = parseSearchParams(raw);
   const result = await searchProperties(params);
+  const view = raw.view === "map" ? "map" : "list";
 
   const heading =
     params.propertyTypes.length === 1
@@ -58,39 +61,48 @@ export default async function PropertiesPage({
         </p>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-[19rem_1fr]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 max-h-[calc(100dvh-7rem)] rounded-xl border border-border/70 bg-card p-4">
-            <PropertyFilters className="max-h-[calc(100dvh-9rem)]" />
-          </div>
-        </aside>
-
+      {view === "map" ? (
         <div>
-          <ResultsToolbar total={result.total} />
+          <ResultsToolbar total={result.total} view="map" />
           <div className="mt-6">
-            {result.items.length === 0 ? (
-              <EmptyState
-                icon={SearchXIcon}
-                title="No encontramos propiedades con estos filtros"
-                description="Prueba ampliar el rango de precio o quitar algún filtro."
-                action={
-                  <Button asChild variant="outline">
-                    <Link href="/properties">Limpiar filtros</Link>
-                  </Button>
-                }
-              />
-            ) : (
-              <PropertyResults
-                initialPage={{
-                  items: result.items,
-                  total: result.total,
-                  nextCursor: result.nextCursor,
-                }}
-              />
-            )}
+            <MapSearchView layout="split" />
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="grid gap-8 lg:grid-cols-[19rem_1fr]">
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 max-h-[calc(100dvh-7rem)] rounded-xl border border-border/70 bg-card p-4">
+              <PropertyFilters className="max-h-[calc(100dvh-9rem)]" />
+            </div>
+          </aside>
+
+          <div>
+            <ResultsToolbar total={result.total} />
+            <div className="mt-6">
+              {result.items.length === 0 ? (
+                <EmptyState
+                  icon={SearchXIcon}
+                  title="No encontramos propiedades con estos filtros"
+                  description="Prueba ampliar el rango de precio o quitar algún filtro."
+                  action={
+                    <Button asChild variant="outline">
+                      <Link href="/properties">Limpiar filtros</Link>
+                    </Button>
+                  }
+                />
+              ) : (
+                <PropertyResults
+                  initialPage={{
+                    items: result.items,
+                    total: result.total,
+                    nextCursor: result.nextCursor,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </Container>
   );
 }

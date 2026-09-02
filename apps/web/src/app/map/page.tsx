@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { ComingSoon } from "@/components/coming-soon";
+import { Container } from "@/components/layout/container";
+import { MapSearchView } from "@/components/map/map-search-view";
 
 export const metadata: Metadata = {
-  title: "Mapa de propiedades",
-  description: "Explora propiedades sobre el mapa de República Dominicana.",
+  title: "Mapa de propiedades en República Dominicana",
+  description: "Explora propiedades verificadas sobre el mapa. Mueve el mapa y busca en cualquier zona.",
+  alternates: { canonical: "/map" },
 };
 
 export default function MapPage() {
   return (
-    <ComingSoon
-      title="Búsqueda en el mapa"
-      description="Estamos afinando la experiencia de mapa con pins de propiedades y «buscar en esta zona»."
-      phase="fase 1"
-    />
+    <Container size="wide" className="py-6">
+      <h1 className="mb-4 text-xl font-semibold tracking-tight">Explora sobre el mapa</h1>
+      <Suspense fallback={<div className="h-[calc(100dvh-8rem)] animate-pulse rounded-xl bg-muted" />}>
+        <MapSearchView layout="full" />
+      </Suspense>
+    </Container>
   );
 }

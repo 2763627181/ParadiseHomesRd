@@ -19,7 +19,9 @@ export const registerSchema = z
     phone: optionalPhoneDoSchema,
     password: passwordSchema,
     confirmPassword: z.string(),
-    acceptTerms: z.literal(true, { error: "Debes aceptar los términos y la política de privacidad" }),
+    acceptTerms: z
+      .boolean()
+      .refine((v) => v === true, "Debes aceptar los términos y la política de privacidad"),
     next: z.string().startsWith("/").max(300).optional(),
   })
   .refine((v) => v.password === v.confirmPassword, {

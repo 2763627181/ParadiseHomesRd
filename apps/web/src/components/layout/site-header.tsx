@@ -3,11 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HeartIcon, MenuIcon, SearchIcon, UserRoundIcon } from "lucide-react";
+import { HeartIcon, MenuIcon, SearchIcon } from "lucide-react";
 import { PRIMARY_NAV } from "@paradise/config";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/layout/user-menu";
 import {
   Sheet,
   SheetContent,
@@ -84,9 +85,9 @@ export function SiteHeader() {
             <ThemeToggle />
           </div>
 
-          <Button asChild variant="ghost" size="sm" className="hidden lg:inline-flex">
-            <Link href="/login">Iniciar sesión</Link>
-          </Button>
+          <div className="hidden lg:block">
+            <UserMenu />
+          </div>
 
           <Button
             asChild
@@ -151,18 +152,6 @@ export function SiteHeader() {
               </div>
             </SheetContent>
           </Sheet>
-
-          <Button
-            asChild
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Mi cuenta"
-            className="hidden lg:inline-flex"
-          >
-            <Link href="/dashboard">
-              <UserRoundIcon className="size-[1.15rem]" />
-            </Link>
-          </Button>
         </div>
       </Container>
     </header>

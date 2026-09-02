@@ -3,20 +3,22 @@ import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@paradise/database/types";
 
 import { env, isSupabaseConfigured, serverEnv } from "@/lib/env";
 
 /**
  * Cliente Supabase para Server Components / Route Handlers / Server Actions.
  * Devuelve `null` en modo demo (sin backend).
+ *
+ * Sin genérico `Database`: los tipos se regeneran con `pnpm db:types` una vez
+ * exista el proyecto Supabase. Hasta entonces las consultas devuelven `any`.
  */
-export async function getSupabaseServerClient(): Promise<SupabaseClient<Database> | null> {
+export async function getSupabaseServerClient(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured) return null;
 
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(env.SUPABASE_URL!, env.SUPABASE_ANON_KEY!, {
+  return createServerClient(env.SUPABASE_URL!, env.SUPABASE_ANON_KEY!, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
