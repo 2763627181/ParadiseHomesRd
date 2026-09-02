@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
 import { SITE } from "@paradise/config";
 
-export const runtime = "edge";
 export const alt = `${SITE.name} — ${SITE.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -26,13 +25,15 @@ export default function OgImage() {
           <span style={{ fontSize: 40, fontWeight: 400, marginLeft: 12, opacity: 0.7 }}>Homes</span>
           <span style={{ fontSize: 22, fontWeight: 700, marginLeft: 8, color: "#B8935E" }}>RD</span>
         </div>
+
         <div style={{ display: "flex", flexDirection: "column", color: "#F4F8F5" }}>
-          <div style={{ fontSize: 68, fontWeight: 600, lineHeight: 1.05, letterSpacing: -2 }}>
+          <div style={{ display: "flex", fontSize: 66, fontWeight: 600, letterSpacing: -2 }}>
             Encuentra tu lugar en
-            <br />
+          </div>
+          <div style={{ display: "flex", fontSize: 66, fontWeight: 600, letterSpacing: -2 }}>
             República Dominicana.
           </div>
-          <div style={{ fontSize: 28, marginTop: 24, color: "rgba(244,248,245,0.7)" }}>
+          <div style={{ display: "flex", fontSize: 28, marginTop: 28, color: "rgba(244,248,245,0.7)" }}>
             Propiedades verificadas para comprar, alquilar o invertir.
           </div>
         </div>
