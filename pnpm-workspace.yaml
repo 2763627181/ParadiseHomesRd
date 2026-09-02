@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - "@supabase/auth-js"
+  - "@supabase/functions-js"
+  - "@supabase/postgrest-js"
+  - "@supabase/realtime-js"
+  - "@supabase/storage-js"
+  - "@supabase/supabase-js"

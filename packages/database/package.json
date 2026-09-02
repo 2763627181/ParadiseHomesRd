@@ -1,0 +1,35 @@
+{
+  "name": "@paradise/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/database.types.ts",
+    "./seed-data": "./src/seed-data.ts"
+  },
+  "scripts": {
+    "migrate": "tsx scripts/migrate.ts",
+    "seed": "tsx scripts/seed.ts",
+    "reset": "tsx scripts/migrate.ts --reset && tsx scripts/seed.ts",
+    "types": "tsx scripts/gen-types.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .turbo dist"
+  },
+  "dependencies": {
+    "@paradise/config": "workspace:*",
+    "@paradise/types": "workspace:*",
+    "@paradise/utils": "workspace:*",
+    "@supabase/supabase-js": "2.114.0",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "dotenv": "17.4.2",
+    "rimraf": "6.1.3",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3"
+  }
+}
