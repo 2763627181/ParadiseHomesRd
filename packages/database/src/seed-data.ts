@@ -516,6 +516,7 @@ function buildProject(seq: number, spec: ProjectSpec): Project {
     floors: between(6, 14),
     unitCount: spec.unitsPerTower,
   }));
+  const buildingLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const units = buildings.flatMap((building, b) =>
     Array.from({ length: spec.unitsPerTower }, (_, u) => {
       const level = Math.floor(u / 2) + 2;
@@ -523,7 +524,10 @@ function buildProject(seq: number, spec: ProjectSpec): Project {
       const area = 55 + beds * 28 + between(-6, 12);
       const price = Math.round((spec.priceFrom + (spec.priceTo - spec.priceFrom) * rand()) / 1000) * 1000;
       const statusRoll = rand();
-      const label = `${building.name.slice(0, 1)}${level}0${u + 1}`;
+      // La letra viene de la posición del edificio (no del nombre) para garantizar
+      // unicidad de `code` por proyecto: la constraint es (project_id, code).
+      const letter = buildingLetters[b] ?? `X${b + 1}`;
+      const label = `${letter}${level}${String(u + 1).padStart(2, "0")}`;
       return {
         id: uuid("e3", seq * 1000 + b * 100 + u),
         code: `${code}-${label}`,
