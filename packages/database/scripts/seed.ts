@@ -212,6 +212,10 @@ async function main() {
       ) sub where l.id = sub.loc_id
     `;
 
+    // ── 9. Avanzar secuencias de códigos más allá de los datos demo ───────
+    await sql`select setval('property_code_seq', greatest(1, coalesce((select max(nullif(regexp_replace(code, '\\D', '', 'g'), '')::int) from properties), 0)), true)`;
+    await sql`select setval('project_code_seq',  greatest(1, coalesce((select max(nullif(regexp_replace(code, '\\D', '', 'g'), '')::int) from projects), 0)), true)`;
+
     console.log("\n✓ Seed completo.\n");
   } finally {
     await sql.end();

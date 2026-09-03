@@ -184,6 +184,14 @@ w(`update locations l set property_count = coalesce(sub.c, 0) from (
   ) x where loc_id is not null group by loc_id
 ) sub where l.id = sub.loc_id;`);
 w();
+
+// ── Avanzar las secuencias de códigos más allá de los datos demo ───────────
+// (el seed inserta codes explícitos; sin esto, la primera propiedad publicada
+//  por un usuario chocaría con PH-APT-00001).
+w("-- Sincronizar secuencias de códigos");
+w(`select setval('property_code_seq', greatest(1, coalesce((select max(nullif(regexp_replace(code, '\\D', '', 'g'), '')::int) from properties), 0)), true);`);
+w(`select setval('project_code_seq',  greatest(1, coalesce((select max(nullif(regexp_replace(code, '\\D', '', 'g'), '')::int) from projects), 0)), true);`);
+w();
 w("commit;");
 w();
 w(

@@ -1488,15 +1488,17 @@ do $$
 begin
   insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
   values
-    ('property-media', 'property-media', true, 15728640,
-     array['image/jpeg','image/png','image/webp','image/avif']),
-    ('project-media', 'project-media', true, 20971520,
-     array['image/jpeg','image/png','image/webp','image/avif','application/pdf']),
+    ('property-media', 'property-media', true, 26214400,
+     array['image/jpeg','image/jpg','image/png','image/webp','image/avif','image/gif','image/heic','image/heif']),
+    ('project-media', 'project-media', true, 26214400,
+     array['image/jpeg','image/jpg','image/png','image/webp','image/avif','image/gif','image/heic','image/heif','application/pdf']),
     ('org-media', 'org-media', true, 5242880,
      array['image/jpeg','image/png','image/webp','image/svg+xml']),
     ('avatars', 'avatars', true, 3145728,
      array['image/jpeg','image/png','image/webp'])
-  on conflict (id) do nothing;
+  on conflict (id) do update set
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
 
   begin
     execute $p$create policy "ph_public_media_read" on storage.objects for select
@@ -1589,3 +1591,62 @@ grant insert, update, delete on all tables in schema public to authenticated;
 grant all on all tables in schema public to service_role;
 grant usage, select on all sequences in schema public to authenticated, service_role;
 grant execute on all functions in schema public to anon, authenticated, service_role;
+
+
+-- ═══ 0009_code_sequences_safe.sql ═══════════════════════════════════════════════
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Paradise Homes RD — 0009 · Códigos a prueba de colisiones
+--
+-- El seed inserta propiedades/proyectos con `code` explícito y NO avanza las
+-- secuencias. Sin esto, la primera propiedad publicada por un usuario chocaría
+-- con `PH-APT-00001`. Esta migración:
+--   1. hace que los triggers de código reintenten hasta encontrar uno libre.
+--   2. sincroniza las secuencias con los datos existentes.
+-- Idempotente: se puede ejecutar varias veces.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+create or replace function assign_property_code()
+returns trigger language plpgsql as $$
+declare
+  candidate text;
+begin
+  if new.code is null or new.code = '' then
+    loop
+      candidate := 'PH-' || property_type_prefix(new.property_type) || '-' ||
+                   lpad(nextval('property_code_seq')::text, 5, '0');
+      exit when not exists (select 1 from properties where code = candidate);
+    end loop;
+    new.code := candidate;
+  end if;
+  return new;
+end;
+$$;
+
+create or replace function assign_project_code()
+returns trigger language plpgsql as $$
+declare
+  candidate text;
+begin
+  if new.code is null or new.code = '' then
+    loop
+      candidate := 'PH-PRJ-' || lpad(nextval('project_code_seq')::text, 5, '0');
+      exit when not exists (select 1 from projects where code = candidate);
+    end loop;
+    new.code := candidate;
+  end if;
+  return new;
+end;
+$$;
+
+-- Sincronizar las secuencias con el máximo número usado (por si el seed ya corrió).
+select setval(
+  'property_code_seq',
+  greatest(1, coalesce((select max(nullif(regexp_replace(code, '\D', '', 'g'), '')::int) from properties), 0)),
+  true
+);
+select setval(
+  'project_code_seq',
+  greatest(1, coalesce((select max(nullif(regexp_replace(code, '\D', '', 'g'), '')::int) from projects), 0)),
+  true
+);

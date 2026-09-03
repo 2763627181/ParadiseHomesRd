@@ -6,8 +6,8 @@
 const U = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=70`;
 
 export const LOCATION_IMAGES: Record<string, string> = {
-  "distrito-nacional": U("1580746738099-79f5f4fefe0e"),
-  "santo-domingo-dn": U("1580746738099-79f5f4fefe0e"),
+  "distrito-nacional": U("1596436889106-be35e843f974"),
+  "santo-domingo-dn": U("1596436889106-be35e843f974"),
   "santo-domingo": U("1596436889106-be35e843f974"),
   "santo-domingo-este": U("1567496898669-ee935f5f647a"),
   "santo-domingo-norte": U("1449844908441-8829872d2607"),

@@ -14,8 +14,17 @@ export interface UploadTicket {
   message?: string;
 }
 
-const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const MAX_BYTES = 15 * 1024 * 1024;
+const ALLOWED = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+]);
+const MAX_BYTES = 25 * 1024 * 1024;
 
 /**
  * Crea una URL firmada para subir una imagen directamente a Supabase Storage
@@ -30,11 +39,13 @@ export async function createUploadUrl(input: {
   if (!isSupabaseConfigured) {
     return { ok: false, message: "El almacenamiento no está disponible en modo demo." };
   }
-  if (!ALLOWED.has(input.contentType)) {
-    return { ok: false, message: "Formato no permitido. Usa JPG, PNG, WebP o AVIF." };
+  const contentType =
+    input.contentType === "image/jpg" ? "image/jpeg" : (input.contentType || "image/jpeg");
+  if (!ALLOWED.has(contentType) && !contentType.startsWith("image/")) {
+    return { ok: false, message: "Formato no permitido. Usa una imagen (JPG, PNG, WebP…)." };
   }
   if (input.size > MAX_BYTES) {
-    return { ok: false, message: "La imagen supera los 15 MB." };
+    return { ok: false, message: "La imagen supera los 25 MB." };
   }
 
   const admin = getSupabaseAdminClient();

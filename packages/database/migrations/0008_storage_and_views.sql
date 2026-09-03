@@ -10,15 +10,17 @@ do $$
 begin
   insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
   values
-    ('property-media', 'property-media', true, 15728640,
-     array['image/jpeg','image/png','image/webp','image/avif']),
-    ('project-media', 'project-media', true, 20971520,
-     array['image/jpeg','image/png','image/webp','image/avif','application/pdf']),
+    ('property-media', 'property-media', true, 26214400,
+     array['image/jpeg','image/jpg','image/png','image/webp','image/avif','image/gif','image/heic','image/heif']),
+    ('project-media', 'project-media', true, 26214400,
+     array['image/jpeg','image/jpg','image/png','image/webp','image/avif','image/gif','image/heic','image/heif','application/pdf']),
     ('org-media', 'org-media', true, 5242880,
      array['image/jpeg','image/png','image/webp','image/svg+xml']),
     ('avatars', 'avatars', true, 3145728,
      array['image/jpeg','image/png','image/webp'])
-  on conflict (id) do nothing;
+  on conflict (id) do update set
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
 
   begin
     execute $p$create policy "ph_public_media_read" on storage.objects for select
