@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config } from "dotenv";
+import postgres from "postgres";
 
 /** Carga variables desde la raíz del repo y desde apps/web/.env.local. */
 export function loadEnv(): void {
@@ -8,6 +9,7 @@ export function loadEnv(): void {
     resolve(process.cwd(), ".env"),
     resolve(process.cwd(), ".env.local"),
     resolve(process.cwd(), "../../.env"),
+    resolve(process.cwd(), "../../.env.local"),
     resolve(process.cwd(), "../../apps/web/.env.local"),
     resolve(process.cwd(), "apps/web/.env.local"),
   ];
@@ -28,4 +30,20 @@ export function requireEnv(name: string): string {
 
 export function getDbUrl(): string {
   return requireEnv("SUPABASE_DB_URL");
+}
+
+/** Cliente `postgres` configurado para Supabase (SSL, pooler-aware). */
+export function createSql() {
+  const url = getDbUrl();
+  const isLocal = /localhost|127\.0\.0\.1|::1/.test(url);
+  const isPooler = url.includes("pooler.supabase.com");
+  return postgres(url, {
+    max: 1,
+    idle_timeout: 20,
+    connect_timeout: 30,
+    onnotice: () => {},
+    ssl: isLocal ? false : "require",
+    // El transaction pooler no soporta prepared statements.
+    prepare: !isPooler,
+  });
 }

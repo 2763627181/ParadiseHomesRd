@@ -15,6 +15,9 @@
     "seed": "tsx scripts/seed.ts",
     "reset": "tsx scripts/migrate.ts --reset && tsx scripts/seed.ts",
     "types": "tsx scripts/gen-types.ts",
+    "sql:schema": "node scripts/gen-schema-sql.mjs",
+    "sql:seed": "tsx scripts/gen-seed-sql.ts",
+    "sql": "pnpm sql:schema && pnpm sql:seed",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf .turbo dist"
   },

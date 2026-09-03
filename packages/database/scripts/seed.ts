@@ -7,7 +7,6 @@
  */
 
 import { LOCATIONS } from "@paradise/config";
-import postgres from "postgres";
 import {
   demoAgencies,
   demoAgents,
@@ -16,12 +15,12 @@ import {
   demoProperties,
   DEMO_SUMMARY,
 } from "../src/seed-data";
-import { getDbUrl, loadEnv } from "./_env";
+import { createSql, loadEnv } from "./_env";
 
 loadEnv();
 
 async function main() {
-  const sql = postgres(getDbUrl(), { max: 1, onnotice: () => {} });
+  const sql = createSql();
 
   try {
     console.log("Sembrando datos demo de Paradise Homes RD…\n");

@@ -10,8 +10,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import postgres from "postgres";
-import { getDbUrl, loadEnv } from "./_env";
+import { createSql, loadEnv } from "./_env";
 
 loadEnv();
 
@@ -20,7 +19,7 @@ const MIGRATIONS_DIR = resolve(__dirname, "../migrations");
 const RESET = process.argv.includes("--reset");
 
 async function main() {
-  const sql = postgres(getDbUrl(), { max: 1, onnotice: () => {} });
+  const sql = createSql();
 
   try {
     if (RESET) {

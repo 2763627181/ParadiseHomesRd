@@ -3,6 +3,17 @@
 > Seguimiento del plan de 20 STEPs (ver `ARCHITECTURE.md` §13).
 > Última actualización: 2026-09-02.
 
+## 🔌 Conexión a Supabase
+
+- **Proyecto:** `xzczevhutiwigvlqwlpx` · claves configuradas en `apps/web/.env.local` (no versionado).
+- **App ↔ Supabase:** conectada por HTTPS (REST + Auth verificados). El puerto Postgres
+  5432/6543 está bloqueado en la red actual, así que las migraciones se aplican desde el
+  **SQL Editor del dashboard** — ver [`SETUP-SUPABASE.md`](./SETUP-SUPABASE.md).
+- **Scripts listos:** `packages/database/schema.sql` (37 tablas + RLS + vistas) y
+  `packages/database/seed.sql` (datos demo) — pegar y ejecutar en el SQL Editor.
+- Mientras el schema no esté aplicado, la app cae automáticamente a los datos demo en
+  memoria (sin romperse).
+
 ## ✅ Completado
 
 | STEP | Entregado |

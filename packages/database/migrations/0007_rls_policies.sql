@@ -12,18 +12,30 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Helpers -------------------------------------------------------------------
+-- SECURITY DEFINER + search_path fijo: estas funciones se llaman DENTRO de las
+-- políticas RLS, así que NO deben disparar RLS de nuevo (evita recursión infinita
+-- en `profiles`). Leen con privilegios del owner y solo devuelven un booleano/id.
 create or replace function auth_role()
-returns user_role language sql stable as $$
+returns user_role
+language sql stable security definer set search_path = public
+as $$
   select role from profiles where id = auth.uid();
 $$;
 
 create or replace function is_staff()
-returns boolean language sql stable as $$
-  select coalesce(auth_role() in ('ADMIN', 'SUPER_ADMIN'), false);
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select coalesce(
+    (select role in ('ADMIN', 'SUPER_ADMIN') from profiles where id = auth.uid()),
+    false
+  );
 $$;
 
 create or replace function is_agency_member(target_agency uuid)
-returns boolean language sql stable as $$
+returns boolean
+language sql stable security definer set search_path = public
+as $$
   select exists (
     select 1 from organization_members m
     where m.profile_id = auth.uid()
@@ -33,7 +45,9 @@ returns boolean language sql stable as $$
 $$;
 
 create or replace function is_developer_member(target_developer uuid)
-returns boolean language sql stable as $$
+returns boolean
+language sql stable security definer set search_path = public
+as $$
   select exists (
     select 1 from organization_members m
     where m.profile_id = auth.uid()
@@ -43,8 +57,33 @@ returns boolean language sql stable as $$
 $$;
 
 create or replace function current_agent_id()
-returns uuid language sql stable as $$
+returns uuid
+language sql stable security definer set search_path = public
+as $$
   select id from agents where profile_id = auth.uid();
+$$;
+
+-- Helpers para romper la recursión mutua entre las políticas de `contacts` y `leads`.
+create or replace function contact_belongs_to_user(c_id uuid)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select exists (select 1 from contacts c where c.id = c_id and c.profile_id = auth.uid());
+$$;
+
+create or replace function agent_owns_contact(c_id uuid)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1 from leads l
+    where l.contact_id = c_id
+      and (
+        l.agent_id = current_agent_id()
+        or is_agency_member(l.agency_id)
+        or is_developer_member(l.developer_id)
+      )
+  );
 $$;
 
 -- Enable RLS --------------------------------------------------------------------
@@ -229,10 +268,7 @@ create policy "recently_viewed_own" on recently_viewed for all
 create policy "contacts_visibility" on contacts for select using (
   profile_id = auth.uid()
   or is_staff()
-  or exists (
-    select 1 from leads l where l.contact_id = contacts.id
-    and (l.agent_id = current_agent_id() or is_agency_member(l.agency_id) or is_developer_member(l.developer_id))
-  )
+  or agent_owns_contact(id)
 );
 
 create policy "leads_visibility" on leads for select using (
@@ -240,7 +276,7 @@ create policy "leads_visibility" on leads for select using (
   or agent_id = current_agent_id()
   or is_agency_member(agency_id)
   or is_developer_member(developer_id)
-  or exists (select 1 from contacts c where c.id = contact_id and c.profile_id = auth.uid())
+  or contact_belongs_to_user(contact_id)
 );
 create policy "leads_agent_agency_update" on leads for update using (
   is_staff() or agent_id = current_agent_id() or is_agency_member(agency_id) or is_developer_member(developer_id)

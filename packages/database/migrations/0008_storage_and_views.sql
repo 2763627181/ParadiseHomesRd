@@ -2,40 +2,52 @@
 -- Paradise Homes RD — 0008 · Storage buckets + vistas de conveniencia
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- ── Storage: bucket público de multimedia ──────────────────────────────────
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values
-  ('property-media', 'property-media', true, 15728640,
-   array['image/jpeg','image/png','image/webp','image/avif']),
-  ('project-media', 'project-media', true, 20971520,
-   array['image/jpeg','image/png','image/webp','image/avif','application/pdf']),
-  ('org-media', 'org-media', true, 5242880,
-   array['image/jpeg','image/png','image/webp','image/svg+xml']),
-  ('avatars', 'avatars', true, 3145728,
-   array['image/jpeg','image/png','image/webp'])
-on conflict (id) do nothing;
+-- ── Storage: buckets públicos de multimedia ────────────────────────────────
+-- Envuelto en un bloque tolerante: si el rol que ejecuta no tiene permisos
+-- sobre el schema `storage` (poco común en Supabase) el resto del schema igual
+-- se aplica. Las políticas de storage se pueden crear luego desde el dashboard.
+do $$
+begin
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values
+    ('property-media', 'property-media', true, 15728640,
+     array['image/jpeg','image/png','image/webp','image/avif']),
+    ('project-media', 'project-media', true, 20971520,
+     array['image/jpeg','image/png','image/webp','image/avif','application/pdf']),
+    ('org-media', 'org-media', true, 5242880,
+     array['image/jpeg','image/png','image/webp','image/svg+xml']),
+    ('avatars', 'avatars', true, 3145728,
+     array['image/jpeg','image/png','image/webp'])
+  on conflict (id) do nothing;
 
--- Lectura pública de los buckets públicos
-create policy "public_media_read" on storage.objects for select
-  using (bucket_id in ('property-media','project-media','org-media','avatars'));
+  begin
+    execute $p$create policy "ph_public_media_read" on storage.objects for select
+      using (bucket_id in ('property-media','project-media','org-media','avatars'))$p$;
+  exception when duplicate_object then null; end;
 
--- Subida: cualquier usuario autenticado puede subir a carpetas de trabajo;
--- el backend valida propiedad real de la entidad antes de asociar la URL.
-create policy "authenticated_media_upload" on storage.objects for insert
-  to authenticated
-  with check (bucket_id in ('property-media','project-media','org-media','avatars'));
+  begin
+    execute $p$create policy "ph_media_upload" on storage.objects for insert to authenticated
+      with check (bucket_id in ('property-media','project-media','org-media','avatars'))$p$;
+  exception when duplicate_object then null; end;
 
-create policy "authenticated_media_update" on storage.objects for update
-  to authenticated
-  using (owner = auth.uid())
-  with check (owner = auth.uid());
+  begin
+    execute $p$create policy "ph_media_update" on storage.objects for update to authenticated
+      using (owner = auth.uid()) with check (owner = auth.uid())$p$;
+  exception when duplicate_object then null; end;
 
-create policy "authenticated_media_delete" on storage.objects for delete
-  to authenticated
-  using (owner = auth.uid());
+  begin
+    execute $p$create policy "ph_media_delete" on storage.objects for delete to authenticated
+      using (owner = auth.uid())$p$;
+  exception when duplicate_object then null; end;
+
+exception when insufficient_privilege then
+  raise notice 'Sin permisos sobre storage.*; configura los buckets desde el dashboard de Supabase.';
+end$$;
 
 -- ── Vista: resumen de propiedad para listados (evita N+1 en el cliente) ────
-create or replace view property_summaries as
+-- `security_invoker` => la vista respeta la RLS de `properties` (anon solo ve PUBLISHED).
+create or replace view property_summaries
+with (security_invoker = true) as
 select
   p.id, p.code, p.slug, p.title,
   p.operation_type, p.property_type, p.condition_status,
@@ -67,7 +79,8 @@ left join agents agt      on agt.id = p.agent_id;
 comment on view property_summaries is 'Propiedad desnormalizada para cards/listados. Respeta RLS de properties.';
 
 -- ── Vista: agentes con conteo de propiedades activas ──────────────────────
-create or replace view agent_directory as
+create or replace view agent_directory
+with (security_invoker = true) as
 select
   a.*,
   ag.name as agency_name, ag.slug as agency_slug,
@@ -77,7 +90,8 @@ from agents a
 left join agencies ag on ag.id = a.agency_id;
 
 -- ── Vista: agencias con métricas públicas ────────────────────────────────
-create or replace view agency_directory as
+create or replace view agency_directory
+with (security_invoker = true) as
 select
   a.*,
   city.name as city_name,
@@ -86,3 +100,14 @@ select
   (select count(*) from agents ag where ag.agency_id = a.id) as agent_count
 from agencies a
 left join locations city on city.id = a.city_id;
+
+-- Exponer vistas a los roles de la API de Supabase
+grant select on property_summaries, agent_directory, agency_directory to anon, authenticated, service_role;
+
+-- ── Grants explícitos (respaldo de los default privileges de Supabase) ─────
+grant usage on schema public to anon, authenticated, service_role;
+grant select on all tables in schema public to anon, authenticated;
+grant insert, update, delete on all tables in schema public to authenticated;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to authenticated, service_role;
+grant execute on all functions in schema public to anon, authenticated, service_role;

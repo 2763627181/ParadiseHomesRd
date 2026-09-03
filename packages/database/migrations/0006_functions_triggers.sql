@@ -140,23 +140,27 @@ create trigger trg_commissions_code before insert on commissions
 
 -- ── search_vector de propiedades ───────────────────────────────────────────
 create or replace function properties_search_vector_update()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+set search_path = public, extensions, pg_catalog
+as $$
 declare
   sector_name text;
   city_name text;
   province_name text;
+  cfg regconfig := 'public.es_unaccent'::regconfig;
 begin
   select name into sector_name from locations where id = new.sector_id;
   select name into city_name from locations where id = new.city_id;
   select name into province_name from locations where id = new.province_id;
 
   new.search_vector :=
-    setweight(to_tsvector('es_unaccent', coalesce(new.title, '')), 'A') ||
-    setweight(to_tsvector('es_unaccent',
+    setweight(to_tsvector(cfg, coalesce(new.title, '')), 'A') ||
+    setweight(to_tsvector(cfg,
       coalesce(sector_name,'') || ' ' || coalesce(city_name,'') || ' ' || coalesce(province_name,'')), 'A') ||
-    setweight(to_tsvector('es_unaccent', coalesce(new.code, '')), 'A') ||
-    setweight(to_tsvector('es_unaccent', coalesce(new.address, '')), 'B') ||
-    setweight(to_tsvector('es_unaccent', coalesce(new.description, '')), 'C');
+    setweight(to_tsvector(cfg, coalesce(new.code, '')), 'A') ||
+    setweight(to_tsvector(cfg, coalesce(new.address, '')), 'B') ||
+    setweight(to_tsvector(cfg, coalesce(new.description, '')), 'C');
   return new;
 end;
 $$;

@@ -1,22 +1,46 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Paradise Homes RD — 0001 · Extensiones y tipos ENUM
+--
+-- En Supabase las extensiones viven en el schema `extensions`. Este archivo es
+-- idempotente y seguro tanto en Supabase como en un Postgres local.
 -- ─────────────────────────────────────────────────────────────────────────────
 
-create extension if not exists "pgcrypto";       -- gen_random_uuid()
-create extension if not exists "pg_trgm";         -- búsqueda por similitud
-create extension if not exists "unaccent";        -- normalización de acentos
-create extension if not exists "citext";          -- emails case-insensitive
-create extension if not exists "cube";
-create extension if not exists "earthdistance";   -- distancia geográfica (fase 1)
-
--- Config de búsqueda en español que ignora acentos
 do $$
+declare
+  ext_schema text := case
+    when exists (select 1 from pg_namespace where nspname = 'extensions') then 'extensions'
+    else 'public'
+  end;
 begin
-  if not exists (select 1 from pg_ts_config where cfgname = 'es_unaccent') then
-    create text search configuration es_unaccent (copy = spanish);
-    alter text search configuration es_unaccent
-      alter mapping for hword, hword_part, word with unaccent, spanish_stem;
+  execute format('create extension if not exists pgcrypto  with schema %I', ext_schema);
+  execute format('create extension if not exists pg_trgm   with schema %I', ext_schema);
+  execute format('create extension if not exists unaccent  with schema %I', ext_schema);
+  execute format('create extension if not exists citext    with schema %I', ext_schema);
+  execute format('create extension if not exists cube      with schema %I', ext_schema);
+  execute format('create extension if not exists earthdistance with schema %I', ext_schema);
+end$$;
+
+-- Config de búsqueda en español que ignora acentos.
+do $$
+declare
+  unaccent_ref text;
+begin
+  if exists (select 1 from pg_ts_config where cfgname = 'es_unaccent') then
+    return;
   end if;
+
+  select n.nspname || '.unaccent'
+    into unaccent_ref
+  from pg_ts_dict d
+  join pg_namespace n on n.oid = d.dictnamespace
+  where d.dictname = 'unaccent'
+  limit 1;
+
+  create text search configuration es_unaccent (copy = spanish);
+  execute format(
+    'alter text search configuration es_unaccent alter mapping for hword, hword_part, word with %s, spanish_stem',
+    coalesce(unaccent_ref, 'unaccent')
+  );
 end$$;
 
 -- ── ENUMs ────────────────────────────────────────────────────────────────────
