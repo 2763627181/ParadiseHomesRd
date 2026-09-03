@@ -16,9 +16,11 @@ import {
   type DemoSearchResult,
 } from "./demo-store";
 import {
+  sbAllPublishedSlugs,
   sbGetFeaturedProperties,
   sbGetPropertyBySlug,
   sbSearchProperties,
+  sbSimilarProperties,
 } from "./supabase/properties";
 
 export interface PropertySearchResponse {
@@ -72,9 +74,17 @@ export async function getSimilarProperties(
   property: Property,
   limit = 4,
 ): Promise<PropertySummary[]> {
+  if (isSupabaseConfigured) {
+    const rows = await sbSimilarProperties(property, limit);
+    if (rows && rows.length) return rows;
+  }
   return demoSimilarProperties(property, limit);
 }
 
 export async function getAllPropertySlugs(): Promise<string[]> {
+  if (isSupabaseConfigured) {
+    const supabaseSlugs = await sbAllPublishedSlugs();
+    if (supabaseSlugs && supabaseSlugs.length) return supabaseSlugs;
+  }
   return demoAllPropertySlugs();
 }

@@ -154,6 +154,45 @@ export async function sbSearchProperties(
   };
 }
 
+export async function sbSimilarProperties(
+  property: Property,
+  limit: number,
+): Promise<PropertySummary[] | null> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return null;
+
+  let q = supabase
+    .from("property_summaries")
+    .select(SUMMARY_COLUMNS)
+    .eq("status", "PUBLISHED")
+    .eq("operation_type", property.operationType)
+    .neq("id", property.id)
+    .limit(limit + 4);
+
+  if (property.location.citySlug) {
+    q = q.or(
+      `city_slug.eq.${property.location.citySlug},property_type.eq.${property.propertyType}`,
+    );
+  } else {
+    q = q.eq("property_type", property.propertyType);
+  }
+
+  const { data, error } = await q;
+  if (error) return null;
+
+  const rows = ((data ?? []) as Parameters<typeof viewRowToPropertySummary>[0][]).map(
+    viewRowToPropertySummary,
+  );
+  // Prioriza mismo sector, luego mismo tipo.
+  rows.sort((a, b) => {
+    const score = (p: PropertySummary) =>
+      (p.location.sectorSlug === property.location.sectorSlug ? 2 : 0) +
+      (p.propertyType === property.propertyType ? 1 : 0);
+    return score(b) - score(a);
+  });
+  return rows.slice(0, limit);
+}
+
 export async function sbGetFeaturedProperties(limit: number): Promise<PropertySummary[] | null> {
   const supabase = await getSupabaseServerClient();
   if (!supabase) return null;
@@ -168,6 +207,19 @@ export async function sbGetFeaturedProperties(limit: number): Promise<PropertySu
   return ((data ?? []) as Parameters<typeof viewRowToPropertySummary>[0][]).map(
     viewRowToPropertySummary,
   );
+}
+
+export async function sbAllPublishedSlugs(): Promise<string[] | null> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("status", "PUBLISHED")
+    .order("published_at", { ascending: false })
+    .limit(2000);
+  if (error) return null;
+  return (data ?? []).map((r: { slug: string }) => r.slug);
 }
 
 export async function sbGetPropertyBySlug(slug: string): Promise<Property | null | undefined> {

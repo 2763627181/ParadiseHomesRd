@@ -110,7 +110,7 @@ Dominicana, marcados con `is_demo = true`. No usar en producción.
 
 ## Contacto
 
-Paradise Homes RD — Joseph Steven Julián Ortiz · WhatsApp +1 849-862-0269
+Paradise Homes RD — Joshua Steven Williams Ortiz · WhatsApp +1 849-862-0269
 
 ## Licencia
 

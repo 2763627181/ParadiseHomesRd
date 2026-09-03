@@ -24,7 +24,7 @@ export const SITE = {
 } as const;
 
 export const CONTACT = {
-  founderName: "Joseph Steven Julián Ortiz",
+  founderName: "Joshua Steven Williams Ortiz",
   whatsapp: "18498620269",
   whatsappDisplay: "+1 849-862-0269",
   email: "hola@paradisehomesrd.com",

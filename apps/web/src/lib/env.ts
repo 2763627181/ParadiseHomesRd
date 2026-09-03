@@ -13,7 +13,7 @@ export const env = {
   APP_NAME: optional("NEXT_PUBLIC_APP_NAME") ?? "Paradise Homes RD",
 
   ADMIN_WHATSAPP: optional("NEXT_PUBLIC_ADMIN_WHATSAPP") ?? "18498620269",
-  ADMIN_CONTACT_NAME: optional("NEXT_PUBLIC_ADMIN_CONTACT_NAME") ?? "Joseph Steven Julián Ortiz",
+  ADMIN_CONTACT_NAME: optional("NEXT_PUBLIC_ADMIN_CONTACT_NAME") ?? "Joshua Steven Williams Ortiz",
 
   SUPABASE_URL: optional("NEXT_PUBLIC_SUPABASE_URL"),
   SUPABASE_ANON_KEY: optional("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
