@@ -54,3 +54,16 @@ export async function requireUser(): Promise<SessionUser> {
   if (!user) throw new Error("UNAUTHENTICATED");
   return user;
 }
+
+export function isStaffUser(user: SessionUser | null): boolean {
+  return user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+}
+
+export function isAgencyUser(user: SessionUser | null): boolean {
+  return (
+    user?.role === "AGENCY_ADMIN" ||
+    user?.role === "DEVELOPER_ADMIN" ||
+    Boolean(user?.memberships.some((m) => m.role === "owner" || m.role === "admin"))
+  );
+}
+
