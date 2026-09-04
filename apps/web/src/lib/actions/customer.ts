@@ -15,6 +15,28 @@ export interface CustomerActionResult {
 
 const UNAUTHORIZED: CustomerActionResult = { ok: false, message: "Inicia sesión para continuar." };
 
+export async function createSavedSearch(
+  name: string,
+  params: Record<string, unknown>,
+): Promise<CustomerActionResult> {
+  const user = await getSessionUser();
+  if (!user) return UNAUTHORIZED;
+
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return { ok: false, message: "Servicio no disponible." };
+
+  const { error } = await supabase.from("saved_searches").insert({
+    user_id: user.id,
+    name: name.trim().slice(0, 120) || "Búsqueda guardada",
+    params,
+  });
+  if (error) return { ok: false, message: error.message };
+
+  revalidatePath("/dashboard/searches");
+  revalidatePath("/dashboard/alerts");
+  return { ok: true, message: "Búsqueda guardada." };
+}
+
 export async function deleteSavedSearch(id: string): Promise<CustomerActionResult> {
   const user = await getSessionUser();
   if (!user) return UNAUTHORIZED;

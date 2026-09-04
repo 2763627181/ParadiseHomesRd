@@ -2,11 +2,21 @@
 
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpDownIcon, LayoutGridIcon, MapIcon, SlidersHorizontalIcon } from "lucide-react";
+import {
+  ArrowUpDownIcon,
+  BookmarkPlusIcon,
+  LayoutGridIcon,
+  Loader2Icon,
+  MapIcon,
+  SlidersHorizontalIcon,
+} from "lucide-react";
+import { toast } from "sonner";
 import { SORT_OPTIONS } from "@paradise/config";
+import type { PropertySearchParams } from "@paradise/types";
 
 import { cn } from "@/lib/utils";
-import { countActiveFilters, parseSearchParams } from "@/lib/search-params";
+import { countActiveFilters, parseSearchParams, summarizeSearchParams } from "@/lib/search-params";
+import { createSavedSearch } from "@/lib/actions/customer";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -36,9 +46,33 @@ export function ResultsToolbar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
 
   const params = parseSearchParams(Object.fromEntries(searchParams.entries()));
   const activeFilters = countActiveFilters(params);
+
+  const saveSearch = async () => {
+    setSaving(true);
+    const result = await createSavedSearch(
+      summarizeSearchParams(params as unknown as Partial<PropertySearchParams>),
+      params,
+    );
+    setSaving(false);
+    if (!result.ok) {
+      if (result.message?.includes("Inicia sesión")) {
+        toast.error("Inicia sesión para guardar búsquedas", {
+          action: { label: "Iniciar sesión", onClick: () => router.push("/login") },
+        });
+      } else {
+        toast.error(result.message ?? "No pudimos guardar la búsqueda.");
+      }
+      return;
+    }
+    toast.success("Búsqueda guardada", {
+      description: "Recíbela en tu panel con alertas cuando haya novedades.",
+      action: { label: "Ver", onClick: () => router.push("/dashboard/searches") },
+    });
+  };
 
   const setParam = (key: string, value: string | null) => {
     const sp = new URLSearchParams(searchParams.toString());
@@ -55,6 +89,18 @@ export function ResultsToolbar({
       </p>
 
       <div className="flex items-center gap-2">
+        {/* Guardar búsqueda */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden sm:inline-flex"
+          onClick={() => void saveSearch()}
+          disabled={saving}
+        >
+          {saving ? <Loader2Icon className="size-4 animate-spin" /> : <BookmarkPlusIcon className="size-4" />}
+          Guardar búsqueda
+        </Button>
+
         {/* Filtros (mobile / tablet) */}
         <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
           <SheetTrigger asChild>
