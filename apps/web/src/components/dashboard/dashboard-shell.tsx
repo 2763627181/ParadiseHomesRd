@@ -26,6 +26,7 @@ import {
   SettingsIcon,
   TargetIcon,
   UploadIcon,
+  UserPlusIcon,
   UserRoundIcon,
   UsersIcon,
   type LucideIcon,
@@ -66,6 +67,7 @@ const ICONS: Record<string, LucideIcon> = {
   agents: IdCardIcon,
   developers: ConstructionIcon,
   projects: LayersIcon,
+  partners: UserPlusIcon,
 };
 
 export interface DashboardNavItem {

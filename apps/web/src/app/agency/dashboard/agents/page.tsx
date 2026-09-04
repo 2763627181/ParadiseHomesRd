@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { getAgencyAgentRows } from "@/lib/data/agency-dashboard";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { AgencyAgentsTable } from "@/components/dashboard/agency-agents-table";
+import { InviteAgentDialog } from "@/components/dashboard/invite-agent-dialog";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Asesores · Inmobiliaria", robots: { index: false } };
@@ -30,9 +31,12 @@ export default async function AgencyAgentsPage() {
 
   return (
     <DashboardShell title="Inmobiliaria" nav={NAV}>
-      <div className="mb-1 flex items-center gap-2">
-        <h1 className="text-xl font-semibold tracking-tight">Asesores</h1>
-        {!membership && <Badge variant="warning">Vista de ejemplo</Badge>}
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold tracking-tight">Asesores</h1>
+          {!membership && <Badge variant="warning">Vista de ejemplo</Badge>}
+        </div>
+        {membership && <InviteAgentDialog />}
       </div>
       <p className="mb-5 text-sm text-muted-foreground">
         {rows.length} asesor{rows.length === 1 ? "" : "es"} en tu equipo.

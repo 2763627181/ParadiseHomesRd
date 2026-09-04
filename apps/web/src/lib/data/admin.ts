@@ -454,3 +454,61 @@ export async function getAdminVerifications(): Promise<AdminVerificationsData | 
 
   return { properties, agents, agencies };
 }
+
+// ── Solicitudes de socios (/partners/apply) ─────────────────────────────────
+
+export interface PartnerApplicationRow {
+  id: string;
+  companyName: string;
+  partnerType: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  whatsapp: string | null;
+  website: string | null;
+  instagram: string | null;
+  inventorySize: string | null;
+  locations: string[];
+  message: string | null;
+  status: string;
+  createdAt: string;
+}
+
+/** Lista de solicitudes de `/partners/apply`, más recientes primero. */
+export async function getPartnerApplications(status?: string): Promise<PartnerApplicationRow[] | null> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return null;
+
+  let q = admin
+    .from("partner_applications")
+    .select(
+      "id, company_name, partner_type, contact_name, email, phone, whatsapp, website, instagram, inventory_size, locations, message, status, created_at",
+    )
+    .order("created_at", { ascending: false })
+    .limit(300);
+
+  if (status && status !== "ALL") q = q.eq("status", status);
+
+  const { data, error } = await q;
+  if (error) {
+    console.error("[getPartnerApplications]", error.message);
+    return null;
+  }
+
+  return (data ?? []).map((p: any) => ({
+    id: p.id,
+    companyName: p.company_name,
+    partnerType: p.partner_type,
+    contactName: p.contact_name,
+    email: p.email,
+    phone: p.phone,
+    whatsapp: p.whatsapp,
+    website: p.website,
+    instagram: p.instagram,
+    inventorySize: p.inventory_size,
+    locations: p.locations ?? [],
+    message: p.message,
+    status: p.status,
+    createdAt: p.created_at,
+  }));
+}

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
-import { getAdminUsers } from "@/lib/data/admin";
+import { getPartnerApplications } from "@/lib/data/admin";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { UsersTable } from "@/components/admin/users-table";
+import { PartnerApplicationsTable, PartnerStatusTabs } from "@/components/admin/partner-applications-table";
 
-export const metadata: Metadata = { title: "Usuarios · Admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Solicitudes de socios · Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
@@ -24,21 +24,42 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/admin/settings", icon: "settings" },
 ];
 
-export default async function AdminUsersPage() {
-  const rows = await getAdminUsers();
+const STATUSES = ["new", "contacted", "approved", "rejected"] as const;
+const TABS = [...STATUSES, "ALL"] as const;
+
+export default async function AdminPartnersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
+  const active = TABS.includes(status as (typeof TABS)[number]) ? status! : "new";
+
+  const [rows, allRows] = await Promise.all([
+    getPartnerApplications(active),
+    getPartnerApplications(),
+  ]);
+
+  const counts: Record<string, number> = { ALL: allRows?.length ?? 0 };
+  for (const s of STATUSES) counts[s] = (allRows ?? []).filter((r) => r.status === s).length;
 
   return (
     <DashboardShell title="Admin" nav={NAV}>
-      <h1 className="mb-1 text-xl font-semibold tracking-tight">Usuarios de la plataforma</h1>
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Solicitudes de socios</h1>
       <p className="mb-5 text-sm text-muted-foreground">
-        {rows ? `${rows.length} usuario${rows.length === 1 ? "" : "s"} registrados` : "Perfiles de la plataforma"}
+        Revisa las solicitudes enviadas desde /partners/apply. Al aprobar, se crea la cuenta (inmobiliaria,
+        desarrolladora o asesor independiente) y se envía una invitación por correo para que definan su
+        contraseña.
       </p>
 
       {rows ? (
-        <UsersTable rows={rows} />
+        <>
+          <PartnerStatusTabs active={active} counts={counts} />
+          <PartnerApplicationsTable rows={rows} />
+        </>
       ) : (
         <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          Conecta Supabase (con service role) para ver los usuarios reales.
+          Conecta Supabase para gestionar solicitudes reales.
         </p>
       )}
     </DashboardShell>
