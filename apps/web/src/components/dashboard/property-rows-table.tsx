@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLinkIcon, EyeIcon, HeartIcon } from "lucide-react";
+import { ExternalLinkIcon, EyeIcon, HeartIcon, PencilIcon } from "lucide-react";
 import { PROPERTY_TYPE_LABELS, type PropertyType } from "@paradise/config";
 import { formatPrice } from "@paradise/utils/currency";
 import { formatRelativeRd } from "@paradise/utils/datetime";
@@ -116,7 +116,12 @@ export function PropertyRowsTable({
                   <Badge variant={meta.variant}>{meta.label}</Badge>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button asChild variant="ghost" size="icon-sm" title="Editar publicación">
+                      <Link href={`/list-property?edit=${row.id}`}>
+                        <PencilIcon className="size-4" />
+                      </Link>
+                    </Button>
                     <Button asChild variant="ghost" size="icon-sm" title="Ver publicación">
                       <Link href={`/property/${row.slug}`} target="_blank">
                         <ExternalLinkIcon className="size-4" />

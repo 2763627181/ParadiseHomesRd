@@ -107,11 +107,15 @@ interface WizardState {
   data: WizardData;
   hydrated: boolean;
   savedAt: number | null;
+  /** Id de la propiedad en edición, o `null` cuando el wizard publica una nueva. */
+  editingId: string | null;
   set: (patch: Partial<WizardData>) => void;
   goTo: (step: number) => void;
   next: () => void;
   back: () => void;
   reset: () => void;
+  /** Resetea el store y lo siembra con los datos de una propiedad existente para editarla. */
+  startEditing: (id: string, data: Partial<WizardData>) => void;
   addImages: (images: WizardImage[]) => void;
   updateImage: (id: string, patch: Partial<WizardImage>) => void;
   removeImage: (id: string) => void;
@@ -128,11 +132,19 @@ export const useWizardStore = create<WizardState>()(
       data: INITIAL,
       hydrated: false,
       savedAt: null,
+      editingId: null,
       set: (patch) => set((s) => ({ data: { ...s.data, ...patch }, savedAt: Date.now() })),
       goTo: (step) => set({ step: Math.max(0, Math.min(TOTAL_STEPS - 1, step)) }),
       next: () => set((s) => ({ step: Math.min(TOTAL_STEPS - 1, s.step + 1) })),
       back: () => set((s) => ({ step: Math.max(0, s.step - 1) })),
-      reset: () => set({ step: 0, data: INITIAL, savedAt: null }),
+      reset: () => set({ step: 0, data: INITIAL, savedAt: null, editingId: null }),
+      startEditing: (id, data) =>
+        set({
+          editingId: id,
+          step: 0,
+          data: { ...INITIAL, ...data },
+          savedAt: Date.now(),
+        }),
       addImages: (images) =>
         set((s) => ({
           data: {
@@ -176,7 +188,7 @@ export const useWizardStore = create<WizardState>()(
     {
       name: "ph_list_property_draft",
       version: 1,
-      partialize: (s) => ({ step: s.step, data: s.data, savedAt: s.savedAt }),
+      partialize: (s) => ({ step: s.step, data: s.data, savedAt: s.savedAt, editingId: s.editingId }),
       onRehydrateStorage: () => (s) => {
         if (s) s.hydrated = true;
       },

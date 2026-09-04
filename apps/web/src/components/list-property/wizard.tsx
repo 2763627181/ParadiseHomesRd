@@ -20,6 +20,7 @@ import { formatPrice } from "@paradise/utils/currency";
 import { cn } from "@/lib/utils";
 import { analytics } from "@/lib/analytics";
 import { submitPropertyListing } from "@/lib/actions/list-property";
+import { updatePropertyListing } from "@/lib/actions/update-property-listing";
 import {
   useWizardStore,
   TOTAL_STEPS,
@@ -665,18 +666,40 @@ function validate(step: number, data: WizardData): string | null {
   }
 }
 
-export function ListPropertyWizard() {
+export interface WizardEditSeed {
+  id: string;
+  data: Partial<WizardData>;
+}
+
+export function ListPropertyWizard({ editSeed = null }: { editSeed?: WizardEditSeed | null } = {}) {
   const step = useWizardStore((s) => s.step);
   const hydrated = useWizardStore((s) => s.hydrated);
   const savedAt = useWizardStore((s) => s.savedAt);
+  const editingId = useWizardStore((s) => s.editingId);
   const next = useWizardStore((s) => s.next);
   const back = useWizardStore((s) => s.back);
   const goTo = useWizardStore((s) => s.goTo);
   const reset = useWizardStore((s) => s.reset);
+  const startEditing = useWizardStore((s) => s.startEditing);
 
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [doneCode, setDoneCode] = React.useState<string | null>(null);
+  const isEditing = Boolean(editSeed);
+
+  // Reconcilia el store con la URL: si venimos con `?edit=<id>`, siembra los
+  // datos del servidor (una sola vez por id); si NO venimos con `edit` pero el
+  // store trae un `editingId` de una sesión de edición anterior, lo limpia
+  // para que "Publicar otra" no arrastre datos de esa edición.
+  React.useEffect(() => {
+    if (!hydrated) return;
+    if (editSeed) {
+      if (editingId !== editSeed.id) startEditing(editSeed.id, editSeed.data);
+    } else if (editingId) {
+      reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, editSeed, editingId]);
 
   const handleNext = () => {
     const data = useWizardStore.getState().data;
@@ -708,10 +731,14 @@ export function ListPropertyWizard() {
     }
     setError(null);
     setSubmitting(true);
-    const result = await submitPropertyListing(data);
+    const result = isEditing
+      ? await updatePropertyListing(editSeed!.id, data)
+      : await submitPropertyListing(data);
     setSubmitting(false);
     if (result.ok && result.code) {
-      analytics.track("lead_created", { props: { channel: "list_property", code: result.code } });
+      if (!isEditing) {
+        analytics.track("lead_created", { props: { channel: "list_property", code: result.code } });
+      }
       setDoneCode(result.code);
       return;
     }
@@ -720,11 +747,15 @@ export function ListPropertyWizard() {
       setError(firstMsg ?? result.message ?? "Revisa los datos.");
       if (first !== undefined) goTo(STEP_OF_FIELD[first] ?? 2);
     } else {
-      setError(result.message ?? "No pudimos publicar. Revisa los datos.");
+      setError(result.message ?? (isEditing ? "No pudimos guardar los cambios." : "No pudimos publicar. Revisa los datos."));
     }
   };
 
-  if (!hydrated) {
+  // Mientras el store no terminó de hidratarse, o (en modo edición) todavía no
+  // sembramos los datos del servidor en el store, mostramos el skeleton para
+  // no parpadear con un borrador viejo/ajeno.
+  const notReady = !hydrated || (isEditing && editingId !== editSeed!.id);
+  if (notReady) {
     return <div className="h-96 animate-pulse rounded-xl bg-muted" />;
   }
 
@@ -732,23 +763,37 @@ export function ListPropertyWizard() {
     return (
       <div className="mx-auto max-w-lg rounded-2xl border border-verified/25 bg-verified/5 p-8 text-center">
         <CheckCircle2Icon className="mx-auto size-10 text-verified" />
-        <h2 className="mt-3 text-xl font-semibold">¡Publicación recibida!</h2>
+        <h2 className="mt-3 text-xl font-semibold">
+          {isEditing ? "Cambios guardados" : "¡Publicación recibida!"}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Tu propiedad <strong>{doneCode}</strong> está en revisión. El equipo de Paradise la
-          verifica y la publica, normalmente en menos de 24 horas.
+          {isEditing ? (
+            <>
+              Tu propiedad <strong>{doneCode}</strong> se actualizó correctamente.
+            </>
+          ) : (
+            <>
+              Tu propiedad <strong>{doneCode}</strong> está en revisión. El equipo de Paradise la
+              verifica y la publica, normalmente en menos de 24 horas.
+            </>
+          )}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <Button asChild variant="outline">
-            <Link href="/">Ir al inicio</Link>
+            <Link href={isEditing ? "/agent/dashboard/properties" : "/"}>
+              {isEditing ? "Ir a mis propiedades" : "Ir al inicio"}
+            </Link>
           </Button>
-          <Button
-            onClick={() => {
-              reset();
-              setDoneCode(null);
-            }}
-          >
-            Publicar otra
-          </Button>
+          {!isEditing && (
+            <Button
+              onClick={() => {
+                reset();
+                setDoneCode(null);
+              }}
+            >
+              Publicar otra
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -802,18 +847,20 @@ export function ListPropertyWizard() {
           ) : (
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting && <Loader2Icon className="size-4 animate-spin" />}
-              Publicar propiedad
+              {isEditing ? "Guardar cambios" : "Publicar propiedad"}
             </Button>
           )}
         </div>
       </div>
 
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Tu borrador se guarda automáticamente en este dispositivo.{" "}
-        <button type="button" className="underline" onClick={() => reset()}>
-          Empezar de cero
-        </button>
-      </p>
+      {!isEditing && (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Tu borrador se guarda automáticamente en este dispositivo.{" "}
+          <button type="button" className="underline" onClick={() => reset()}>
+            Empezar de cero
+          </button>
+        </p>
+      )}
     </div>
   );
 }

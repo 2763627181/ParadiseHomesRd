@@ -9,6 +9,11 @@ import { listPropertySchema } from "@paradise/validation";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth";
+import {
+  normalizeListingPayload,
+  resolveAgentAgencyId,
+  resolveLocationIds,
+} from "@/lib/actions/list-property-shared";
 
 export interface ListingResult {
   ok: boolean;
@@ -18,59 +23,9 @@ export interface ListingResult {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const num = (v: unknown) => {
-  if (v === "" || v === null || v === undefined) return undefined;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : undefined;
-};
 
 export async function submitPropertyListing(raw: any): Promise<ListingResult> {
-  // Normaliza el payload del wizard (strings) al esquema tipado.
-  const payload = {
-    operationType: raw.operationType || undefined,
-    propertyType: raw.propertyType || undefined,
-    conditionStatus: raw.conditionStatus || undefined,
-    provinceSlug: raw.provinceSlug || "",
-    citySlug: raw.citySlug || "",
-    sectorSlug: raw.sectorSlug || undefined,
-    address: raw.address || undefined,
-    latitude: num(raw.latitude),
-    longitude: num(raw.longitude),
-    hideExactLocation: Boolean(raw.hideExactLocation),
-    title: (raw.title ?? "").trim(),
-    description: (raw.description ?? "").trim(),
-    bedrooms: num(raw.bedrooms),
-    bathrooms: num(raw.bathrooms),
-    parkingSpaces: num(raw.parkingSpaces),
-    constructionM2: num(raw.constructionM2),
-    landM2: num(raw.landM2),
-    yearBuilt: num(raw.yearBuilt),
-    floor: num(raw.floor),
-    totalFloors: num(raw.totalFloors),
-    priceOnRequest: Boolean(raw.priceOnRequest),
-    price: num(raw.price),
-    currency: raw.currency || "USD",
-    maintenanceFee: num(raw.maintenanceFee),
-    deliveryDate: raw.deliveryDate || undefined,
-    amenityKeys: Array.isArray(raw.amenityKeys) ? raw.amenityKeys : [],
-    furnished: Boolean(raw.furnished),
-    petFriendly: Boolean(raw.petFriendly),
-    airbnbFriendly: Boolean(raw.airbnbFriendly),
-    images: (raw.images ?? []).map((img: any, i: number) => ({
-      storagePath: img.storagePath,
-      url: img.url,
-      position: i,
-      isCover: Boolean(img.isCover),
-      alt: img.alt || undefined,
-    })),
-    videoUrl: raw.videoUrl || "",
-    virtualTourUrl: raw.virtualTourUrl || "",
-    contactName: (raw.contactName ?? "").trim(),
-    contactPhone: raw.contactPhone ?? "",
-    contactWhatsapp: raw.contactWhatsapp || "",
-    contactEmail: (raw.contactEmail ?? "").trim(),
-    acceptTerms: raw.acceptTerms === true,
-  };
+  const payload = normalizeListingPayload(raw);
 
   const parsed = listPropertySchema.safeParse(payload);
   if (!parsed.success) {
@@ -104,6 +59,7 @@ export async function submitPropertyListing(raw: any): Promise<ListingResult> {
       city: data.citySlug,
       sector: data.sectorSlug,
     });
+    const agencyId = await resolveAgentAgencyId(admin, user?.agentId);
 
     const prefix = PROPERTY_CODE_PREFIX[data.propertyType];
     const tempSlug = `${toSlug(PROPERTY_TYPE_LABELS[data.propertyType])}-${toSlug(data.citySlug)}-${Date.now().toString(36)}`;
@@ -145,6 +101,7 @@ export async function submitPropertyListing(raw: any): Promise<ListingResult> {
         moderation_state: "PENDING_REVIEW",
         owner_profile_id: user?.id ?? null,
         agent_id: user?.agentId ?? null,
+        agency_id: agencyId,
         contact_name: data.contactName,
         contact_phone: data.contactPhone,
         contact_whatsapp: data.contactWhatsapp || data.contactPhone,
@@ -209,18 +166,4 @@ export async function submitPropertyListing(raw: any): Promise<ListingResult> {
     console.error("[submitPropertyListing]", err);
     return { ok: false, message: "No pudimos guardar la publicación. Intenta de nuevo." };
   }
-}
-
-async function resolveLocationIds(
-  admin: any,
-  slugs: { province: string; city: string; sector?: string },
-) {
-  const wanted = [slugs.province, slugs.city, slugs.sector].filter(Boolean) as string[];
-  const { data } = await admin.from("locations").select("id, slug").in("slug", wanted);
-  const bySlug = new Map<string, string>((data ?? []).map((r: any) => [r.slug, r.id]));
-  return {
-    province: bySlug.get(slugs.province) ?? null,
-    city: bySlug.get(slugs.city) ?? null,
-    sector: slugs.sector ? (bySlug.get(slugs.sector) ?? null) : null,
-  };
 }

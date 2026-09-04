@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getLocationPath } from "@paradise/config";
+import type { PropertyStatus } from "@paradise/config";
 import type { Property, PropertySummary } from "@paradise/types";
 import type { ParsedPropertySearchParams } from "@paradise/validation";
 
@@ -385,4 +386,49 @@ export async function sbGetPropertiesByIds(ids: string[]): Promise<Property[] | 
 
   if (error || !data) return null;
   return (data as any[]).map(mapPropertyRow);
+}
+
+/** Datos crudos (no expuestos en `Property`) necesarios para editar/autorizar una propiedad. */
+export interface PropertyForEdit {
+  property: Property;
+  status: PropertyStatus;
+  agentId: string | null;
+  agencyId: string | null;
+  ownerProfileId: string | null;
+  contactName: string;
+  contactPhone: string;
+  contactWhatsapp: string;
+  contactEmail: string;
+}
+
+/**
+ * Trae una propiedad por id sin filtrar por `status` (a diferencia de
+ * `sbGetPropertyBySlug`/`sbGetPropertiesByIds`), para el flujo de edición del
+ * wizard `/list-property?edit=<id>`. Usa el cliente con sesión: RLS ya
+ * restringe la lectura al dueño/agente/agencia/staff, así que un `null` aquí
+ * también sirve como señal de "no autorizado o no existe".
+ */
+export async function sbGetPropertyForEdit(id: string): Promise<PropertyForEdit | null> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data: p, error } = await supabase
+    .from("properties")
+    .select(PROPERTY_FULL_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !p) return null;
+  const row = p as any;
+  return {
+    property: mapPropertyRow(p),
+    status: row.status,
+    agentId: row.agent_id ?? null,
+    agencyId: row.agency_id ?? null,
+    ownerProfileId: row.owner_profile_id ?? null,
+    contactName: row.contact_name ?? "",
+    contactPhone: row.contact_phone ?? "",
+    contactWhatsapp: row.contact_whatsapp ?? "",
+    contactEmail: row.contact_email ?? "",
+  };
 }
