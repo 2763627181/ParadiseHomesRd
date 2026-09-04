@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
-import { getAllLeadsAdmin } from "@/lib/data/leads";
+import { getAdminAgencies } from "@/lib/data/admin";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { LeadsStatusFilter, LeadsTable } from "@/components/dashboard/leads-table";
+import { AgenciesTable } from "@/components/admin/agencies-table";
 
-export const metadata: Metadata = { title: "Leads · Admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Inmobiliarias · Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
@@ -23,24 +23,28 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/admin/settings", icon: "settings" },
 ];
 
-export default async function AdminLeadsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>;
-}) {
-  const { status } = await searchParams;
-  const allLeads = await getAllLeadsAdmin();
-  const leads = status && status !== "ALL" ? allLeads.filter((l) => l.status === status) : allLeads;
+export default async function AdminAgenciesPage() {
+  const rows = await getAdminAgencies();
 
   return (
     <DashboardShell title="Admin" nav={NAV}>
-      <h1 className="mb-1 text-xl font-semibold tracking-tight">Leads de toda la plataforma</h1>
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Inmobiliarias</h1>
       <p className="mb-5 text-sm text-muted-foreground">
-        {allLeads.length} lead{allLeads.length === 1 ? "" : "s"} · de todos los agentes e
-        inmobiliarias.
+        {rows ? `${rows.length} inmobiliaria${rows.length === 1 ? "" : "s"}` : "Directorio de inmobiliarias"}
+        {" · "}la verificación se otorga desde{" "}
+        <a href="/admin/verifications" className="underline underline-offset-2">
+          Verificaciones
+        </a>
+        .
       </p>
-      <LeadsStatusFilter basePath="/admin/leads" active={status ?? "ALL"} />
-      <LeadsTable leads={leads} detailBase="/agent/dashboard/leads" />
+
+      {rows ? (
+        <AgenciesTable rows={rows} />
+      ) : (
+        <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+          Conecta Supabase para ver las inmobiliarias reales.
+        </p>
+      )}
     </DashboardShell>
   );
 }

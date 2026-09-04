@@ -10,7 +10,7 @@ import type { Lead } from "@paradise/types";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { STATUS_LABELS_ES } from "@/lib/actions/leads-crm";
+import { STATUS_LABELS_ES } from "@/lib/lead-status";
 
 const STATUS_VARIANT: Record<LeadStatus, "default" | "secondary" | "success" | "warning" | "destructive" | "outline"> = {
   NEW: "default",

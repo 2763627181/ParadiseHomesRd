@@ -12,7 +12,11 @@ export const metadata: Metadata = { title: "Admin", robots: { index: false } };
 const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/admin", icon: "overview" },
   { label: "Propiedades", href: "/admin/properties", icon: "buildings" },
+  { label: "Proyectos", href: "/admin/projects", icon: "projects" },
   { label: "Usuarios", href: "/admin/users", icon: "users" },
+  { label: "Agentes", href: "/admin/agents", icon: "agents" },
+  { label: "Inmobiliarias", href: "/admin/agencies", icon: "building" },
+  { label: "Desarrolladoras", href: "/admin/developers", icon: "developers" },
   { label: "Leads", href: "/admin/leads", icon: "leads" },
   { label: "Verificaciones", href: "/admin/verifications", icon: "verify" },
   { label: "Analytics", href: "/admin/analytics", icon: "analytics" },

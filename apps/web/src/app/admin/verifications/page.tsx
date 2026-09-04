@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import type { PropertyStatus } from "@paradise/config";
 
-import { getAdminProperties } from "@/lib/data/admin";
+import { getAdminVerifications } from "@/lib/data/admin";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import {
-  PropertyModerationTable,
-  StatusTabs,
-} from "@/components/admin/property-moderation-table";
+  AgencyVerificationTable,
+  AgentVerificationTable,
+  EntityTabs,
+  PropertyVerificationTable,
+} from "@/components/admin/verification-tables";
 
-export const metadata: Metadata = { title: "Propiedades · Admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Verificaciones · Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
@@ -27,31 +28,43 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/admin/settings", icon: "settings" },
 ];
 
-export default async function AdminPropertiesPage({
+const TABS = ["properties", "agents", "agencies"] as const;
+type Tab = (typeof TABS)[number];
+
+export default async function AdminVerificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
-  const { status } = await searchParams;
-  const active = status ?? "PENDING_REVIEW";
-  const result = await getAdminProperties(active as PropertyStatus | "ALL");
+  const { tab } = await searchParams;
+  const active: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : "properties";
+  const result = await getAdminVerifications();
 
   return (
     <DashboardShell title="Admin" nav={NAV}>
-      <h1 className="mb-1 text-xl font-semibold tracking-tight">Propiedades</h1>
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Verificaciones</h1>
       <p className="mb-5 text-sm text-muted-foreground">
-        Revisa y aprueba las publicaciones. Al aprobar, la propiedad se marca Paradise Verified y
-        sale al aire.
+        Otorga el sello Paradise Verified a propiedades, agentes e inmobiliarias que cumplen los
+        criterios de confianza de la plataforma.
       </p>
 
       {result ? (
         <>
-          <StatusTabs counts={result.counts} active={active} />
-          <PropertyModerationTable rows={result.rows} />
+          <EntityTabs
+            active={active}
+            counts={{
+              properties: result.properties.length,
+              agents: result.agents.length,
+              agencies: result.agencies.length,
+            }}
+          />
+          {active === "properties" && <PropertyVerificationTable rows={result.properties} />}
+          {active === "agents" && <AgentVerificationTable rows={result.agents} />}
+          {active === "agencies" && <AgencyVerificationTable rows={result.agencies} />}
         </>
       ) : (
         <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          Conecta Supabase para moderar publicaciones reales.
+          Conecta Supabase para gestionar verificaciones reales.
         </p>
       )}
     </DashboardShell>

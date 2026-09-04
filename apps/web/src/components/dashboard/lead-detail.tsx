@@ -19,12 +19,8 @@ import { formatDateTimeRd, formatRelativeRd } from "@paradise/utils/datetime";
 import type { Lead, LeadActivity, LeadNote } from "@paradise/types";
 
 import { cn } from "@/lib/utils";
-import {
-  addLeadNote,
-  assignLeadToAgent,
-  updateLeadStatus,
-  STATUS_LABELS_ES,
-} from "@/lib/actions/leads-crm";
+import { addLeadNote, assignLeadToAgent, updateLeadStatus } from "@/lib/actions/leads-crm";
+import { STATUS_LABELS_ES } from "@/lib/lead-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

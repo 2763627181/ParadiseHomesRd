@@ -1,27 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { LEAD_STATUS, type LeadStatus } from "@paradise/config";
+import type { LeadStatus } from "@paradise/config";
 
 import { getSessionUser, isAgencyUser, isStaffUser } from "@/lib/auth";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
+import { STATUS_LABELS_ES } from "@/lib/lead-status";
 
 export interface CrmResult {
   ok: boolean;
   message?: string;
 }
-
-const STATUS_LABELS_ES: Record<LeadStatus, string> = {
-  NEW: "Nuevo",
-  CONTACTED: "Contactado",
-  QUALIFIED: "Calificado",
-  VISIT_SCHEDULED: "Visita agendada",
-  VISIT_COMPLETED: "Visita realizada",
-  NEGOTIATING: "Negociando",
-  RESERVED: "Reservado",
-  CLOSED_WON: "Cerrado (ganado)",
-  CLOSED_LOST: "Cerrado (perdido)",
-};
 
 /** El usuario puede gestionar el lead si es staff, el agente asignado, o admin de la agencia dueña. */
 async function canManageLead(leadId: string) {
@@ -147,5 +136,3 @@ export async function scheduleNextActivity(leadId: string, when: string): Promis
   revalidatePath(`/agent/dashboard/leads/${leadId}`);
   return { ok: true };
 }
-
-export { LEAD_STATUS, STATUS_LABELS_ES };

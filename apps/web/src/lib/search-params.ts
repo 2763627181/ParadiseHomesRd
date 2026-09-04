@@ -1,10 +1,13 @@
 import {
   DEFAULT_SORT,
+  OPERATION_LABELS,
+  PROPERTY_TYPE_LABELS_PLURAL,
   type ConditionStatus,
   type PropertyType,
   type SortOption,
 } from "@paradise/config";
 import { propertySearchParamsSchema, type ParsedPropertySearchParams } from "@paradise/validation";
+import { formatPriceRange } from "@paradise/utils/currency";
 import type { PropertySearchParams } from "@paradise/types";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
@@ -85,6 +88,30 @@ export function toDomainParams(parsed: ParsedPropertySearchParams): PropertySear
     cursor: parsed.cursor,
     limit: parsed.limit,
   };
+}
+
+function titleCaseSlug(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Resumen legible de una búsqueda (para búsquedas guardadas sin nombre propio). */
+export function summarizeSearchParams(params: Partial<PropertySearchParams>): string {
+  const parts: string[] = [];
+  if (params.operationType) parts.push(OPERATION_LABELS[params.operationType]);
+  if (params.propertyTypes?.length) {
+    parts.push(
+      params.propertyTypes
+        .map((t) => PROPERTY_TYPE_LABELS_PLURAL[t as keyof typeof PROPERTY_TYPE_LABELS_PLURAL] ?? t)
+        .join(", "),
+    );
+  }
+  if (params.locations?.length) {
+    parts.push(params.locations.map(titleCaseSlug).join(", "));
+  }
+  if (params.minPrice != null || params.maxPrice != null) {
+    parts.push(formatPriceRange(params.minPrice, params.maxPrice, params.currency ?? "USD"));
+  }
+  return parts.length ? parts.join(" · ") : "Todas las propiedades";
 }
 
 /** Cuenta filtros activos (para el badge del botón de filtros). */

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
-import { getAllLeadsAdmin } from "@/lib/data/leads";
+import { getAdminUsers } from "@/lib/data/admin";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { LeadsStatusFilter, LeadsTable } from "@/components/dashboard/leads-table";
+import { UsersTable } from "@/components/admin/users-table";
 
-export const metadata: Metadata = { title: "Leads · Admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Usuarios · Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
@@ -23,24 +23,23 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/admin/settings", icon: "settings" },
 ];
 
-export default async function AdminLeadsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>;
-}) {
-  const { status } = await searchParams;
-  const allLeads = await getAllLeadsAdmin();
-  const leads = status && status !== "ALL" ? allLeads.filter((l) => l.status === status) : allLeads;
+export default async function AdminUsersPage() {
+  const rows = await getAdminUsers();
 
   return (
     <DashboardShell title="Admin" nav={NAV}>
-      <h1 className="mb-1 text-xl font-semibold tracking-tight">Leads de toda la plataforma</h1>
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Usuarios de la plataforma</h1>
       <p className="mb-5 text-sm text-muted-foreground">
-        {allLeads.length} lead{allLeads.length === 1 ? "" : "s"} · de todos los agentes e
-        inmobiliarias.
+        {rows ? `${rows.length} usuario${rows.length === 1 ? "" : "s"} registrados` : "Perfiles de la plataforma"}
       </p>
-      <LeadsStatusFilter basePath="/admin/leads" active={status ?? "ALL"} />
-      <LeadsTable leads={leads} detailBase="/agent/dashboard/leads" />
+
+      {rows ? (
+        <UsersTable rows={rows} />
+      ) : (
+        <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+          Conecta Supabase (con service role) para ver los usuarios reales.
+        </p>
+      )}
     </DashboardShell>
   );
 }

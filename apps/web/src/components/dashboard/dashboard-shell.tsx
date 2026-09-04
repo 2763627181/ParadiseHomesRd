@@ -11,9 +11,12 @@ import {
   BuildingIcon,
   CalendarIcon,
   ClockIcon,
+  ConstructionIcon,
   FileTextIcon,
   HeartIcon,
   HomeIcon,
+  IdCardIcon,
+  LayersIcon,
   LayoutDashboardIcon,
   MegaphoneIcon,
   MenuIcon,
@@ -60,6 +63,9 @@ const ICONS: Record<string, LucideIcon> = {
   marketing: MegaphoneIcon,
   content: FileTextIcon,
   import: UploadIcon,
+  agents: IdCardIcon,
+  developers: ConstructionIcon,
+  projects: LayersIcon,
 };
 
 export interface DashboardNavItem {
