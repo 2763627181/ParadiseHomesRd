@@ -20,29 +20,50 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 function GoogleButton({ next }: { next?: string }) {
   const [pending, setPending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const onClick = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      // En éxito esto lanza un redirect (nunca retorna); en error retorna { ok: false, message }.
+      const result = await loginWithGoogleAction(next);
+      if (result && !result.ok) {
+        setError(result.message ?? "No pudimos iniciar sesión con Google.");
+        setPending(false);
+      }
+    } catch (err) {
+      // Next.js usa una excepción especial para redirect() dentro de la action;
+      // no la tratamos como error real.
+      if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
+      setError("No pudimos iniciar sesión con Google. Intenta de nuevo.");
+      setPending(false);
+    }
+  };
+
   return (
-    <Button
-      type="button"
-      variant="outline"
-      className="w-full"
-      disabled={pending}
-      onClick={() => {
-        setPending(true);
-        void loginWithGoogleAction(next);
-      }}
-    >
-      {pending ? (
-        <Loader2Icon className="size-4 animate-spin" />
-      ) : (
-        <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
-          <path
-            fill="currentColor"
-            d="M12 11v2.5h5.9c-.3 1.5-1.7 4.5-5.9 4.5-3.5 0-6.4-2.9-6.4-6.5S8.5 5.5 12 5.5c2 0 3.4.9 4.2 1.6L18 5.3C16.6 4 14.6 3 12 3 6.9 3 3 6.9 3 12s3.9 9 9 9c5.2 0 8.6-3.6 8.6-8.7 0-.6-.1-1-.2-1.3H12Z"
-          />
-        </svg>
-      )}
-      Continuar con Google
-    </Button>
+    <div className="space-y-1.5">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        disabled={pending}
+        onClick={() => void onClick()}
+      >
+        {pending ? (
+          <Loader2Icon className="size-4 animate-spin" />
+        ) : (
+          <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
+            <path
+              fill="currentColor"
+              d="M12 11v2.5h5.9c-.3 1.5-1.7 4.5-5.9 4.5-3.5 0-6.4-2.9-6.4-6.5S8.5 5.5 12 5.5c2 0 3.4.9 4.2 1.6L18 5.3C16.6 4 14.6 3 12 3 6.9 3 3 6.9 3 12s3.9 9 9 9c5.2 0 8.6-3.6 8.6-8.7 0-.6-.1-1-.2-1.3H12Z"
+            />
+          </svg>
+        )}
+        Continuar con Google
+      </Button>
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
   );
 }
 

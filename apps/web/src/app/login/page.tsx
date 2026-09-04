@@ -12,9 +12,9 @@ export const metadata: Metadata = { title: "Iniciar sesión", robots: { index: f
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   const user = await getSessionUser();
   if (user) redirect(next ?? "/dashboard");
 
@@ -33,6 +33,12 @@ export default async function LoginPage({
             <p className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
               Las cuentas estarán activas al conectar el backend. Tus favoritos ya se guardan en este
               dispositivo.
+            </p>
+          )}
+          {error && (
+            <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              No pudimos completar el inicio de sesión con Google. Intenta de nuevo o usa tu correo y
+              contraseña.
             </p>
           )}
           <LoginForm next={next} disabled={!isSupabaseConfigured} />
