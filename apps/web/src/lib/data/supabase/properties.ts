@@ -222,14 +222,7 @@ export async function sbAllPublishedSlugs(): Promise<string[] | null> {
   return (data ?? []).map((r: { slug: string }) => r.slug);
 }
 
-export async function sbGetPropertyBySlug(slug: string): Promise<Property | null | undefined> {
-  const supabase = await getSupabaseServerClient();
-  if (!supabase) return undefined; // undefined => "no backend, usa demo"
-
-  const { data: p, error } = await supabase
-    .from("properties")
-    .select(
-      `*,
+const PROPERTY_FULL_COLUMNS = `*,
        agency:agencies(id, slug, name, logo_url, cover_image_url, description, website, phone, whatsapp, email, is_verified, areas),
        agent:agents(id, slug, full_name, title, bio, avatar_url, email, phone, whatsapp, languages, areas, response_time_minutes, rating_average, rating_count, is_verified, agency_id),
        project:projects(id, slug, name, developer:developers(name)),
@@ -239,15 +232,9 @@ export async function sbGetPropertyBySlug(slug: string): Promise<Property | null
        images:property_images(*),
        amenities:property_amenities(key),
        features:property_features(key, label, value, group_key),
-       price_history:property_price_history(price, currency, changed_at)`,
-    )
-    .eq("slug", slug)
-    .eq("status", "PUBLISHED")
-    .maybeSingle();
+       price_history:property_price_history(price, currency, changed_at)`;
 
-  if (error || !p) return null;
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+function mapPropertyRow(p: any): Property {
   const row = p as any;
   const images = (row.images ?? [])
     .map(rowToImageAsset)
@@ -367,4 +354,35 @@ export async function sbGetPropertyBySlug(slug: string): Promise<Property | null
     publishedAt: row.published_at,
     lastVerifiedAt: row.last_verified_at,
   } satisfies Property;
+}
+
+export async function sbGetPropertyBySlug(slug: string): Promise<Property | null | undefined> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return undefined; // undefined => "no backend, usa demo"
+
+  const { data: p, error } = await supabase
+    .from("properties")
+    .select(PROPERTY_FULL_COLUMNS)
+    .eq("slug", slug)
+    .eq("status", "PUBLISHED")
+    .maybeSingle();
+
+  if (error || !p) return null;
+  return mapPropertyRow(p);
+}
+
+/** Resuelve varias propiedades por id (favoritos, comparador, colecciones). */
+export async function sbGetPropertiesByIds(ids: string[]): Promise<Property[] | null> {
+  if (!ids.length) return [];
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("properties")
+    .select(PROPERTY_FULL_COLUMNS)
+    .in("id", ids)
+    .eq("status", "PUBLISHED");
+
+  if (error || !data) return null;
+  return (data as any[]).map(mapPropertyRow);
 }

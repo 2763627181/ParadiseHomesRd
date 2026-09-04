@@ -54,8 +54,13 @@ create table contacts (
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
-create unique index contacts_phone_uk on contacts (phone) where phone is not null;
-create unique index contacts_email_uk on contacts (email) where email is not null;
+-- Índices únicos NO parciales: Postgres ya trata cada NULL como distinto, así
+-- que múltiples contactos sin teléfono/correo son válidos de todas formas, y
+-- estos índices sí sirven de destino para `.upsert(..., { onConflict: "phone" })`
+-- (un índice único PARCIAL no puede usarse ahí salvo que el upsert repita el
+-- WHERE exacto). Ver 0010_fix_contacts_unique.sql para el porqué.
+create unique index contacts_phone_key on contacts (phone);
+create unique index contacts_email_key on contacts (email);
 
 -- ── leads ───────────────────────────────────────────────────────────────────
 create table leads (

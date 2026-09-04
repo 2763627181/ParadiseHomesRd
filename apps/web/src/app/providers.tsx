@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { FavoritesSyncProvider } from "@/components/common/favorites-sync-provider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(
@@ -26,7 +27,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider delayDuration={150}>
-          <AnalyticsProvider>{children}</AnalyticsProvider>
+          <AnalyticsProvider>
+            <FavoritesSyncProvider>{children}</FavoritesSyncProvider>
+          </AnalyticsProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

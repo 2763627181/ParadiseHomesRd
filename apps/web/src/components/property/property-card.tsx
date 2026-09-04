@@ -8,6 +8,7 @@ import type { PropertySummary } from "@paradise/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/common/favorite-button";
+import { CompareButton } from "@/components/common/compare-button";
 import { PriceDisplay } from "@/components/common/price-display";
 import { VerifiedBadge } from "@/components/common/verified-badge";
 import { PropertySpecs } from "@/components/property/property-specs";
@@ -135,12 +136,20 @@ export function PropertyCard({
               </Badge>
             )}
           </div>
-          <FavoriteButton
-            id={property.id}
-            slug={property.slug}
-            title={property.title}
-            size={isHorizontal || variant === "compact" ? "sm" : "md"}
-          />
+          <div className="flex flex-col items-end gap-1.5">
+            <FavoriteButton
+              id={property.id}
+              slug={property.slug}
+              title={property.title}
+              size={isHorizontal || variant === "compact" ? "sm" : "md"}
+            />
+            {variant !== "compact" && (
+              <CompareButton
+                id={property.id}
+                size={isHorizontal ? "sm" : "md"}
+              />
+            )}
+          </div>
         </div>
 
         {/* Badges inferiores */}
