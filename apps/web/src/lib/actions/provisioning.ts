@@ -92,10 +92,8 @@ async function provisionOrgAdmin(
     return { ok: false, message: orgError?.message ?? "No se pudo crear la organización." };
   }
 
-  // No existe todavía un dashboard dedicado para desarrolladoras (solo el de
-  // inmobiliaria está construido) — se manda a /dashboard para no aterrizar
-  // en una ruta inexistente hasta que se construya uno específico.
-  const redirectPath = orgType === "agency" ? "/agency/dashboard" : "/dashboard";
+  // Cada tipo de organización tiene su propio panel dedicado.
+  const redirectPath = orgType === "agency" ? "/agency/dashboard" : "/developer/dashboard";
   const invited = await inviteUser(admin, {
     email: application.email,
     fullName: application.contact_name,

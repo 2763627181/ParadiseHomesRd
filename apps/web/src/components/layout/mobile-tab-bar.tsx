@@ -22,6 +22,7 @@ export function MobileTabBar() {
   const hidden =
     pathname.startsWith("/agent/dashboard") ||
     pathname.startsWith("/agency/dashboard") ||
+    pathname.startsWith("/developer/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/list-property");
 

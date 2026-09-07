@@ -12,7 +12,10 @@ export interface CrmResult {
   message?: string;
 }
 
-/** El usuario puede gestionar el lead si es staff, el agente asignado, o admin de la agencia dueña. */
+/**
+ * El usuario puede gestionar el lead si es staff, el agente asignado, admin de
+ * la agencia dueña, o admin ('owner'/'admin') de la desarrolladora del proyecto.
+ */
 async function canManageLead(leadId: string) {
   const user = await getSessionUser();
   if (!user) return { user: null, allowed: false, admin: null as ReturnType<typeof getSupabaseAdminClient> };
@@ -24,7 +27,7 @@ async function canManageLead(leadId: string) {
 
   const { data: lead } = await admin
     .from("leads")
-    .select("agent_id, agency_id")
+    .select("agent_id, agency_id, developer_id")
     .eq("id", leadId)
     .maybeSingle();
   if (!lead) return { user, allowed: false, admin };
@@ -33,8 +36,16 @@ async function canManageLead(leadId: string) {
   const isAgencyManager =
     isAgencyUser(user) &&
     user.memberships.some((m) => m.organizationType === "agency" && m.organizationId === lead.agency_id);
+  const isDeveloperManager =
+    lead.developer_id != null &&
+    user.memberships.some(
+      (m) =>
+        m.organizationType === "developer" &&
+        m.organizationId === lead.developer_id &&
+        (m.role === "owner" || m.role === "admin"),
+    );
 
-  return { user, allowed: isOwnLead || isAgencyManager, admin };
+  return { user, allowed: isOwnLead || isAgencyManager || isDeveloperManager, admin };
 }
 
 export async function updateLeadStatus(
@@ -66,6 +77,7 @@ export async function updateLeadStatus(
   revalidatePath(`/agent/dashboard/leads/${leadId}`);
   revalidatePath("/agent/dashboard/leads");
   revalidatePath("/agency/dashboard/leads");
+  revalidatePath("/developer/dashboard/leads");
   revalidatePath("/admin/leads");
   return { ok: true };
 }
@@ -122,6 +134,7 @@ export async function assignLeadToAgent(leadId: string, agentId: string): Promis
 
   revalidatePath(`/agent/dashboard/leads/${leadId}`);
   revalidatePath("/agency/dashboard/leads");
+  revalidatePath("/developer/dashboard/leads");
   revalidatePath("/admin/leads");
   return { ok: true };
 }

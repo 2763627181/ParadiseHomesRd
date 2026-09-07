@@ -145,10 +145,17 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
         )}
-        {isAgency && (
+        {user.role === "AGENCY_ADMIN" && (
           <DropdownMenuItem asChild>
             <Link href="/agency/dashboard">
               <BuildingIcon /> Panel de inmobiliaria
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {user.role === "DEVELOPER_ADMIN" && (
+          <DropdownMenuItem asChild>
+            <Link href="/developer/dashboard">
+              <BuildingIcon /> Panel de desarrolladora
             </Link>
           </DropdownMenuItem>
         )}

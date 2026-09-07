@@ -79,6 +79,19 @@ export async function getLeadsForAgency(agencyId: string): Promise<Lead[]> {
   return (data ?? []).map(mapLead);
 }
 
+export async function getLeadsForDeveloper(developerId: string): Promise<Lead[]> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return [];
+  const { data, error } = await admin
+    .from("leads")
+    .select(LEAD_SELECT)
+    .eq("developer_id", developerId)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) return [];
+  return (data ?? []).map(mapLead);
+}
+
 export async function getAllLeadsAdmin(): Promise<Lead[]> {
   const admin = getSupabaseAdminClient();
   if (!admin) return [];
