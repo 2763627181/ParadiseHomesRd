@@ -9,6 +9,7 @@ import { PRIMARY_NAV } from "@paradise/config";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/layout/user-menu";
+import { NotificationsBell } from "@/components/layout/notifications-bell";
 import {
   Sheet,
   SheetContent,
@@ -84,6 +85,9 @@ export function SiteHeader() {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
+
+          {/* Solo se renderiza con sesión activa (todas las resoluciones). */}
+          <NotificationsBell />
 
           <div className="hidden lg:block">
             <UserMenu />

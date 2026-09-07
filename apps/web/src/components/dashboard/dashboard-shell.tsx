@@ -7,6 +7,8 @@ import {
   BadgeCheckIcon,
   BarChart3Icon,
   BellIcon,
+  BellRingIcon,
+  HandshakeIcon,
   Building2Icon,
   BuildingIcon,
   CalendarIcon,
@@ -68,6 +70,8 @@ const ICONS: Record<string, LucideIcon> = {
   developers: ConstructionIcon,
   projects: LayersIcon,
   partners: UserPlusIcon,
+  closings: HandshakeIcon,
+  notifications: BellRingIcon,
 };
 
 export interface DashboardNavItem {
