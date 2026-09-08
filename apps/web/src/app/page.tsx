@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { Hero } from "@/components/home/hero";
 import { QuickSearches } from "@/components/home/quick-searches";
+import { RecentlyViewedSection } from "@/components/home/recently-viewed-section";
 import { FeaturedProperties } from "@/components/home/featured-properties";
 import { NewDevelopments } from "@/components/home/new-developments";
 import { VerifiedExplainer } from "@/components/home/verified-explainer";
@@ -33,6 +34,9 @@ export default function HomePage() {
       <Hero />
       <Suspense fallback={null}>
         <QuickSearches />
+      </Suspense>
+      <Suspense fallback={null}>
+        <RecentlyViewedSection />
       </Suspense>
       <Suspense fallback={<SectionFallback />}>
         <FeaturedProperties />
