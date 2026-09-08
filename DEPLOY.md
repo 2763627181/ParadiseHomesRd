@@ -129,21 +129,26 @@ Después actualiza `NEXT_PUBLIC_APP_URL` y el Site URL / Redirect URL de Supabas
 
 ### “El almacenamiento no está disponible” al subir fotos
 
-Los buckets de Supabase Storage **ya existen** (property-media, project-media,
-org-media, avatars). El error casi siempre es que las variables
-`NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` **no estaban en
-Vercel cuando se hizo el build** — esas variables se “hornean” dentro del
-JavaScript del navegador en el momento de compilar, no se leen en caliente.
+Había **dos causas**:
 
-1. Vercel → **Settings → Environment Variables** → confirma que existen
-   `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`, marcadas para
-   **Production** (y Preview).
-2. Vercel → **Deployments** → en el último deploy, menú `···` → **Redeploy**
-   (sin caché). Los cambios de variables NO aplican a un deploy ya hecho.
-3. Tras el redeploy, prueba subir una foto en `/list-property` paso 6.
+1. **Bug de código (ya corregido).** `src/lib/env.ts` leía las variables
+   `NEXT_PUBLIC_*` con acceso dinámico (`process.env[nombre]`). Next.js solo
+   inyecta en el bundle del navegador las que se escriben literalmente
+   (`process.env.NEXT_PUBLIC_SUPABASE_URL`). Resultado: en el navegador
+   `NEXT_PUBLIC_SUPABASE_URL`/`_ANON_KEY` quedaban `undefined`, el cliente de
+   Supabase no se creaba y el subidor decía “almacenamiento no disponible”
+   aunque el servidor sí funcionara. Corregido: ahora se leen literales. El
+   mismo bug afectaba al mapa.
 
-El mismo síntoma aplica al mapa: si falta `NEXT_PUBLIC_GOOGLE_MAPS_KEY` verás
-“Mapa no disponible”. Se arregla igual: agregar la variable y **redeploy**.
+2. **Variables en Vercel.** Aun con el código bueno, necesitas las claves en el
+   entorno de build:
+   - Vercel → **Settings → Environment Variables** → confirma que existen
+     `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` para
+     **Production** (mismos valores que en `apps/web/.env.local`).
+   - Vercel → **Deployments** → último deploy → `···` → **Redeploy**. Los
+     cambios de variables `NEXT_PUBLIC_*` NO aplican a un deploy ya hecho: se
+     hornean al compilar.
+   - Prueba de nuevo en `/list-property` paso 6.
 
 ### Google Maps (“Mapa no disponible”)
 
