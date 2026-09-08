@@ -122,3 +122,58 @@ Después actualiza `NEXT_PUBLIC_APP_URL` y el Site URL / Redirect URL de Supabas
 - [ ] `/list-property` deja completar el wizard y subir fotos.
 - [ ] Enviar una consulta desde una propiedad crea el lead (revisa `/admin/leads`).
 - [ ] Con `RESEND_API_KEY`: al enviar ese lead llega un correo al asesor.
+
+---
+
+## 8. Solución de problemas post-deploy
+
+### “El almacenamiento no está disponible” al subir fotos
+
+Los buckets de Supabase Storage **ya existen** (property-media, project-media,
+org-media, avatars). El error casi siempre es que las variables
+`NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` **no estaban en
+Vercel cuando se hizo el build** — esas variables se “hornean” dentro del
+JavaScript del navegador en el momento de compilar, no se leen en caliente.
+
+1. Vercel → **Settings → Environment Variables** → confirma que existen
+   `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`, marcadas para
+   **Production** (y Preview).
+2. Vercel → **Deployments** → en el último deploy, menú `···` → **Redeploy**
+   (sin caché). Los cambios de variables NO aplican a un deploy ya hecho.
+3. Tras el redeploy, prueba subir una foto en `/list-property` paso 6.
+
+El mismo síntoma aplica al mapa: si falta `NEXT_PUBLIC_GOOGLE_MAPS_KEY` verás
+“Mapa no disponible”. Se arregla igual: agregar la variable y **redeploy**.
+
+### Google Maps (“Mapa no disponible”)
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → mismo proyecto
+   que usaste para el login con Google (o uno nuevo).
+2. **APIs y servicios → Biblioteca** → habilita **Maps JavaScript API**.
+   (Opcional: **Places API** si luego quieres autocompletado de direcciones.)
+3. **APIs y servicios → Credenciales → Crear credenciales → Clave de API**.
+4. Restríngela: en la clave, **Restricciones de aplicación → Sitios web (HTTP
+   referrers)** y agrega:
+   ```
+   https://paradise-homes-rd-web.vercel.app/*
+   http://localhost:3000/*
+   ```
+   En **Restricciones de API** deja solo *Maps JavaScript API*.
+5. Copia la clave y en Vercel agrega:
+   `NEXT_PUBLIC_GOOGLE_MAPS_KEY = <la clave>`
+   (opcional `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` si creas un estilo de mapa).
+6. **Redeploy**.
+
+> No hace falta tarjeta para empezar, pero Google Maps pide facturación
+> activada para quitar el watermark “For development purposes only”. El crédito
+> mensual gratuito de Google cubre de sobra el tráfico inicial.
+
+### ¿Cloudflare?
+
+- **Dominio en Cloudflare:** apunta el dominio a Vercel siguiendo *Sección 6* de
+  este documento (Vercel te da los registros; en Cloudflare ponlos con el proxy
+  en **DNS only / gris** para el registro que Vercel indique). Luego cambia
+  `NEXT_PUBLIC_APP_URL` y las URLs de Supabase Auth al dominio nuevo y redeploy.
+- **Almacenamiento de imágenes:** no hace falta Cloudflare R2 — Supabase Storage
+  ya está integrado y funciona (5 GB gratis). Solo migra a R2 si superas ese
+  límite; requiere un pequeño cambio de código que se puede hacer después.
