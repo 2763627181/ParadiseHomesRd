@@ -60,8 +60,7 @@ Editor** verás las tablas pobladas.
   p. ej. desde otra red): en el dashboard pulsa **Connect** → copia el string del
   **Session pooler**, ponlo en `SUPABASE_DB_URL` (con la contraseña URL-encoded:
   `?` → `%3F`) y corre `pnpm db:migrate && pnpm db:seed`.
-- **Google Maps**: añade `NEXT_PUBLIC_GOOGLE_MAPS_KEY` en `apps/web/.env.local` para
-  activar el mapa (sin la clave se muestra un fallback).
+- **Mapas**: usan OpenStreetMap + Leaflet, no requieren API key ni configuración.
 
 ## Seguridad
 

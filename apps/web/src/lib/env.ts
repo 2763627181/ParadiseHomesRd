@@ -22,9 +22,6 @@ export const env = {
   SUPABASE_URL: clean(process.env.NEXT_PUBLIC_SUPABASE_URL),
   SUPABASE_ANON_KEY: clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
 
-  GOOGLE_MAPS_KEY: clean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY),
-  GOOGLE_MAPS_MAP_ID: clean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID),
-
   GA_ID: clean(process.env.NEXT_PUBLIC_GA_ID),
   META_PIXEL_ID: clean(process.env.NEXT_PUBLIC_META_PIXEL_ID),
   TIKTOK_PIXEL_ID: clean(process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID),
@@ -59,6 +56,3 @@ export const serverEnv = {
 
 /** ¿Hay backend Supabase configurado? Si no, la web corre en modo demo. */
 export const isSupabaseConfigured = Boolean(env.SUPABASE_URL && env.SUPABASE_ANON_KEY);
-
-/** ¿Hay Google Maps disponible? Si no, se muestra fallback. */
-export const isMapsConfigured = Boolean(env.GOOGLE_MAPS_KEY);

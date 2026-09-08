@@ -59,8 +59,8 @@ pnpm install
 
 # 2. Variables de entorno
 cp .env.example apps/web/.env.local
-#   Completa NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
-#   SUPABASE_DB_URL y NEXT_PUBLIC_GOOGLE_MAPS_KEY.
+#   Completa NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+#   y SUPABASE_DB_URL.
 
 # 3. Base de datos: aplicar migraciones y seed
 pnpm db:migrate          # aplica packages/database/migrations/*.sql a SUPABASE_DB_URL
@@ -71,7 +71,7 @@ pnpm db:types            # regenera packages/database/src/database.types.ts
 pnpm dev                 # web en http://localhost:3000
 ```
 
-> Sin `NEXT_PUBLIC_GOOGLE_MAPS_KEY` la app funciona: el mapa muestra un fallback elegante.
+> Los mapas usan OpenStreetMap (Leaflet), sin API key.
 > Sin Supabase configurado, la app arranca en modo demo con datos del seed local.
 
 ## Scripts

@@ -74,8 +74,8 @@ export default async function AdminSettingsPage() {
             <dd>{env.ADMIN_WHATSAPP}</dd>
           </div>
           <div className="rounded-lg border border-border/70 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Google Maps</dt>
-            <dd>{env.GOOGLE_MAPS_KEY ? "Configurado" : "Sin configurar (fallback)"}</dd>
+            <dt className="text-xs text-muted-foreground">Mapas</dt>
+            <dd>OpenStreetMap (sin API key)</dd>
           </div>
           <div className="rounded-lg border border-border/70 px-3 py-2">
             <dt className="text-xs text-muted-foreground">Correos (Resend)</dt>

@@ -52,8 +52,6 @@ Copia los valores desde tu `apps/web/.env.local` local **excepto `NEXT_PUBLIC_AP
 |---|---|
 | `RESEND_API_KEY` | Envío de **correos** de notificación (nuevo lead, mensaje, visita, verificación). Sin esta clave, las notificaciones **in-app siguen funcionando**, solo no salen correos. Crea la key en [resend.com](https://resend.com) con permiso **Sending access** (no hace falta Full access — la app solo envía correos, no administra dominios). |
 | `RESEND_FROM_EMAIL` | Remitente, p. ej. `Paradise Homes RD <notificaciones@tudominio.com>`. Debe ser de un **dominio verificado** en Resend. Si aún no tienes dominio propio, deja este módulo para después: Resend solo deja enviar desde `onboarding@resend.dev` **a tu propio correo verificado**, no a terceros. |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Mapas reales en `/map` y en el detalle. Sin ella se muestra un fallback. |
-| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | ID de estilo del mapa de Google. |
 | `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_TIKTOK_PIXEL_ID` / `NEXT_PUBLIC_POSTHOG_KEY` | Analítica y píxeles (opcionales). |
 | `NEXT_PUBLIC_SENTRY_DSN` | Reporte de errores. |
 | `CRON_SECRET` | Token para el cron de **alertas de búsquedas guardadas** (`apps/web/vercel.json` lo programa a diario). Pon cualquier string largo y aleatorio; Vercel manda ese header automáticamente. Sin esta variable el cron responde 401 y no se envían alertas. En plan Hobby el cron corre 1×/día; para alertas "instantáneas" reales sube la frecuencia en `vercel.json` (requiere plan Pro). |
@@ -137,8 +135,7 @@ Había **dos causas**:
    (`process.env.NEXT_PUBLIC_SUPABASE_URL`). Resultado: en el navegador
    `NEXT_PUBLIC_SUPABASE_URL`/`_ANON_KEY` quedaban `undefined`, el cliente de
    Supabase no se creaba y el subidor decía “almacenamiento no disponible”
-   aunque el servidor sí funcionara. Corregido: ahora se leen literales. El
-   mismo bug afectaba al mapa.
+   aunque el servidor sí funcionara. Corregido: ahora se leen literales.
 
 2. **Variables en Vercel.** Aun con el código bueno, necesitas las claves en el
    entorno de build:
@@ -150,28 +147,18 @@ Había **dos causas**:
      hornean al compilar.
    - Prueba de nuevo en `/list-property` paso 6.
 
-### Google Maps (“Mapa no disponible”)
+### Mapas
 
-1. [console.cloud.google.com](https://console.cloud.google.com) → mismo proyecto
-   que usaste para el login con Google (o uno nuevo).
-2. **APIs y servicios → Biblioteca** → habilita **Maps JavaScript API**.
-   (Opcional: **Places API** si luego quieres autocompletado de direcciones.)
-3. **APIs y servicios → Credenciales → Crear credenciales → Clave de API**.
-4. Restríngela: en la clave, **Restricciones de aplicación → Sitios web (HTTP
-   referrers)** y agrega:
-   ```
-   https://paradise-homes-rd-web.vercel.app/*
-   http://localhost:3000/*
-   ```
-   En **Restricciones de API** deja solo *Maps JavaScript API*.
-5. Copia la clave y en Vercel agrega:
-   `NEXT_PUBLIC_GOOGLE_MAPS_KEY = <la clave>`
-   (opcional `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` si creas un estilo de mapa).
-6. **Redeploy**.
+Los mapas usan **OpenStreetMap + Leaflet**: no necesitan API key, cuenta de
+Google Cloud, tarjeta ni redeploy especial. Funcionan solos en `/map` y en el
+detalle de propiedades y proyectos.
 
-> No hace falta tarjeta para empezar, pero Google Maps pide facturación
-> activada para quitar el watermark “For development purposes only”. El crédito
-> mensual gratuito de Google cubre de sobra el tráfico inicial.
+Si algún día el tráfico crece mucho, la política de uso de los tiles gratuitos
+de OpenStreetMap se queda corta. El cambio es de **una línea**: en
+`src/components/map/property-map-inner.tsx` y
+`src/components/property/property-location-map-inner.tsx`, reemplaza la `url` del
+`<TileLayer>` por la de un proveedor con plan gratis generoso (Carto, MapTiler,
+Stadia Maps). No hay nada más que tocar.
 
 ### ¿Cloudflare?
 
