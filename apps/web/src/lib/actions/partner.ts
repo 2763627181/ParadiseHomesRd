@@ -2,10 +2,11 @@
 
 import { cookies } from "next/headers";
 import { ATTRIBUTION_COOKIE, parseAttribution } from "@paradise/utils/attribution";
-import { partnerApplicationSchema } from "@paradise/validation";
+import { PARTNER_TYPE_LABELS, partnerApplicationSchema } from "@paradise/validation";
 
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
+import { notifyStaff } from "@/lib/notify";
 
 export interface PartnerActionResult {
   ok: boolean;
@@ -56,5 +57,21 @@ export async function submitPartnerApplication(input: unknown): Promise<PartnerA
     console.error("[partner] error", error);
     return { ok: false, message: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp." };
   }
+
+  // Avisa al equipo para que la revise en /admin/partners (in-app + correo).
+  try {
+    const typeLabel =
+      PARTNER_TYPE_LABELS[data.partnerType as keyof typeof PARTNER_TYPE_LABELS] ?? data.partnerType;
+    await notifyStaff({
+      type: "partner_application",
+      title: `Nueva solicitud de socio: ${data.companyName}`,
+      body: `${typeLabel} · ${data.contactName} · ${data.email}`,
+      payload: { href: "/admin/partners?status=new" },
+      email: true,
+    });
+  } catch (err) {
+    console.error("[partner] notifyStaff", err);
+  }
+
   return { ok: true };
 }
