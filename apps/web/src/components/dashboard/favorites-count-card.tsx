@@ -10,7 +10,7 @@ export function FavoritesCountCard() {
   const count = useFavoritesStore((s) => Object.keys(s.items).length);
   return (
     <Link
-      href="/favorites"
+      href="/dashboard/favorites"
       className="rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-border"
     >
       <HeartIcon className="size-4 text-muted-foreground" />

@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/dashboard", icon: "overview" },
-  { label: "Favoritos", href: "/favorites", icon: "favorites" },
+  { label: "Favoritos", href: "/dashboard/favorites", icon: "favorites" },
   { label: "Mensajes", href: "/dashboard/messages", icon: "messages" },
   { label: "Notificaciones", href: "/dashboard/notifications", icon: "notifications" },
   { label: "Búsquedas guardadas", href: "/dashboard/searches", icon: "search" },

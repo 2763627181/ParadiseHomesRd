@@ -127,7 +127,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/favorites">
+          <Link href="/dashboard/favorites">
             <HeartIcon /> Favoritos
           </Link>
         </DropdownMenuItem>

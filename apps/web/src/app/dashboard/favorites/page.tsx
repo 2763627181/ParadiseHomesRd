@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 
-import { getSessionUser } from "@/lib/auth";
-import { getUserInquiries } from "@/lib/data/customer";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { DashboardLoginPrompt } from "@/components/dashboard/dashboard-login-prompt";
-import { CustomerInquiriesTable } from "@/components/dashboard/customer-inquiries-table";
+import { FavoritesList } from "@/components/favorites/favorites-list";
 
-export const metadata: Metadata = { title: "Mis consultas", robots: { index: false } };
+export const metadata: Metadata = { title: "Favoritos", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
@@ -21,22 +18,15 @@ const NAV: DashboardNavItem[] = [
   { label: "Perfil", href: "/dashboard/profile", icon: "profile" },
 ];
 
-export default async function InquiriesPage() {
-  const user = await getSessionUser();
-
+export default function DashboardFavoritesPage() {
   return (
     <DashboardShell title="Mi cuenta" nav={NAV}>
-      <h1 className="mb-1 text-xl font-semibold tracking-tight">Mis consultas</h1>
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Favoritos</h1>
       <p className="mb-5 text-sm text-muted-foreground">
-        El estado de cada consulta que has enviado a un asesor sobre una propiedad o proyecto.
+        Las propiedades y proyectos que guardaste. Con la sesión iniciada se sincronizan entre tus
+        dispositivos.
       </p>
-
-      {!user ? <DashboardLoginPrompt next="/dashboard/inquiries" /> : <InquiriesContent userId={user.id} />}
+      <FavoritesList />
     </DashboardShell>
   );
-}
-
-async function InquiriesContent({ userId }: { userId: string }) {
-  const inquiries = await getUserInquiries(userId);
-  return <CustomerInquiriesTable inquiries={inquiries} />;
 }
