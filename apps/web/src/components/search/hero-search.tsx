@@ -129,9 +129,9 @@ export function HeroSearch({ className }: { className?: string }) {
           <div className="hidden md:col-span-2 md:block" />
         )}
 
-        <Button type="submit" size="lg" className="h-12 md:w-auto">
+        <Button type="submit" size="lg" className="h-12 md:w-auto md:px-6">
           <SearchIcon className="size-4" />
-          <span className="md:hidden lg:inline">Buscar</span>
+          Buscar
         </Button>
       </div>
     </form>

@@ -117,6 +117,7 @@ export function summarizeSearchParams(params: Partial<PropertySearchParams>): st
 /** Cuenta filtros activos (para el badge del botón de filtros). */
 export function countActiveFilters(params: ParsedPropertySearchParams): number {
   let n = 0;
+  if (params.q) n++;
   if (params.propertyTypes.length) n++;
   if (params.locations.length) n++;
   if (params.minPrice != null || params.maxPrice != null) n++;

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SearchIcon } from "lucide-react";
 import {
   BEDROOM_OPTIONS,
   BATHROOM_OPTIONS,
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { parseSearchParams, serializeSearchParams } from "@/lib/search-params";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -102,6 +104,26 @@ export function PropertyFilters({ onApplied, className }: PropertyFiltersProps) 
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="flex-1 space-y-6 overflow-y-auto px-1 pb-4">
+        {/* Búsqueda por texto */}
+        <Group label="Buscar">
+          <div className="relative">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={draft.q ?? ""}
+              onChange={(e) => patch({ q: e.target.value || undefined })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  apply();
+                }
+              }}
+              placeholder="Zona, título o código…"
+              className="h-10 pl-9"
+              aria-label="Buscar por texto"
+            />
+          </div>
+        </Group>
+
         {/* Operación */}
         <Group label="Operación">
           <div className="flex gap-1 rounded-lg bg-secondary p-1">

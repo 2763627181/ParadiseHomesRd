@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { EmptyState } from "@/components/common/empty-state";
 import { PropertyFilters } from "@/components/property/property-filters";
+import { PropertyKeywordSearch } from "@/components/property/property-keyword-search";
 import { PropertyResults } from "@/components/property/property-results";
 import { ResultsToolbar } from "@/components/property/results-toolbar";
 import { MapSearchView } from "@/components/map/map-search-view";
@@ -59,6 +60,7 @@ export default async function PropertiesPage({
         <p className="mt-1 text-sm text-muted-foreground">
           En Santo Domingo, Punta Cana, Santiago, Las Terrenas y toda República Dominicana.
         </p>
+        <PropertyKeywordSearch className="mt-4 max-w-xl" />
       </header>
 
       {view === "map" ? (
