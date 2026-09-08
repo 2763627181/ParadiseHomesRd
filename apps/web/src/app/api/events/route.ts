@@ -54,6 +54,32 @@ export async function POST(request: NextRequest) {
     occurred_at: str(body.occurred_at) ?? new Date().toISOString(),
   });
 
+  // "Vistas recientemente": registra la vista de propiedad/proyecto para el
+  // usuario en sesión (o la sesión anónima). Un fallo aquí no afecta la respuesta.
+  if (name === "property_view" || name === "project_view") {
+    const userId = str(body.user_id);
+    const sessionId = str(body.session_id);
+    const propertyId = str(body.property_id);
+    const projectId = str(body.project_id);
+    if ((userId || sessionId) && (propertyId || projectId)) {
+      try {
+        const match: Record<string, string | null> = { property_id: propertyId, project_id: projectId };
+        if (userId) match.user_id = userId;
+        else match.session_id = sessionId;
+        await admin.from("recently_viewed").delete().match(match);
+        await admin.from("recently_viewed").insert({
+          user_id: userId,
+          session_id: userId ? null : sessionId,
+          property_id: propertyId,
+          project_id: projectId,
+          viewed_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error("[events:recently_viewed]", err);
+      }
+    }
+  }
+
   return new NextResponse(null, { status: 204 });
 }
 

@@ -47,6 +47,10 @@ export const serverEnv = {
   get RESEND_FROM_EMAIL(): string {
     return optional("RESEND_FROM_EMAIL") ?? "Paradise Homes RD <no-reply@paradisehomesrd.com>";
   },
+  /** Token para autenticar los cron jobs de Vercel. */
+  get CRON_SECRET(): string | undefined {
+    return optional("CRON_SECRET");
+  },
 };
 
 /** ¿Hay backend Supabase configurado? Si no, la web corre en modo demo. */

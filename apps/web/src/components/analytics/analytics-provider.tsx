@@ -12,6 +12,7 @@ import {
 } from "@paradise/utils/attribution";
 
 import { analytics, getSessionId, initAnalytics } from "@/lib/analytics";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function readCookie(name: string): string | undefined {
   return document.cookie
@@ -45,6 +46,20 @@ function PageViewTracker() {
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     initAnalytics(getSessionId(), null);
+
+    // Asocia los eventos (y "vistas recientemente") a la cuenta si hay sesión.
+    const supabase = getSupabaseBrowserClient();
+    if (supabase) {
+      void supabase.auth.getUser().then(({ data }) => {
+        if (data.user) analytics.setContext({ userId: data.user.id });
+      });
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+        analytics.setContext({ userId: session?.user?.id ?? null });
+      });
+      // Limpieza al desmontar (el provider vive toda la sesión, pero por prolijidad).
+      window.addEventListener("beforeunload", () => sub.subscription.unsubscribe());
+    }
+
     try {
       const incoming = readAttributionParams(window.location.href, document.referrer);
       const previous = parseAttribution(

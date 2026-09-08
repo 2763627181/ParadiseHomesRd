@@ -56,6 +56,7 @@ Copia los valores desde tu `apps/web/.env.local` local **excepto `NEXT_PUBLIC_AP
 | `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | ID de estilo del mapa de Google. |
 | `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_TIKTOK_PIXEL_ID` / `NEXT_PUBLIC_POSTHOG_KEY` | Analítica y píxeles (opcionales). |
 | `NEXT_PUBLIC_SENTRY_DSN` | Reporte de errores. |
+| `CRON_SECRET` | Token para el cron de **alertas de búsquedas guardadas** (`apps/web/vercel.json` lo programa a diario). Pon cualquier string largo y aleatorio; Vercel manda ese header automáticamente. Sin esta variable el cron responde 401 y no se envían alertas. En plan Hobby el cron corre 1×/día; para alertas "instantáneas" reales sube la frecuencia en `vercel.json` (requiere plan Pro). |
 
 Luego dale a **Deploy**.
 
