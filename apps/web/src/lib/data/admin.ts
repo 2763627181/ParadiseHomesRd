@@ -6,6 +6,22 @@ import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+/** Ids de entidades con una solicitud de verificación PENDING (opcionalmente de un solo tipo). */
+export async function getPendingVerificationTargetIds(
+  targetType?: "agent" | "agency" | "developer" | "property",
+): Promise<Set<string>> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return new Set();
+  let q = admin.from("verification_requests").select("target_id, target_type").eq("status", "PENDING");
+  if (targetType) q = q.eq("target_type", targetType);
+  const { data, error } = await q.limit(1000);
+  if (error) {
+    console.error("[getPendingVerificationTargetIds]", error.message);
+    return new Set();
+  }
+  return new Set((data ?? []).map((r: any) => r.target_id as string));
+}
+
 export interface AdminPropertyRow {
   id: string;
   code: string;

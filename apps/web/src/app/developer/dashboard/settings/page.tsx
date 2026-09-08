@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { getDeveloperProfileRow } from "@/lib/data/developer-dashboard";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { DeveloperSettingsForm } from "@/components/dashboard/developer-settings-form";
+import { RequestVerificationCard } from "@/components/dashboard/request-verification-card";
+import { getPendingVerificationTargetIds } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Ajustes · Desarrolladora", robots: { index: false } };
@@ -24,7 +26,10 @@ export default async function DeveloperSettingsPage() {
   const membership = user?.memberships.find((m) => m.organizationType === "developer");
   const developerId = membership?.organizationId ?? demoDevelopers[0]!.id;
 
-  const profile = await getDeveloperProfileRow(developerId);
+  const [profile, pendingIds] = await Promise.all([
+    getDeveloperProfileRow(developerId),
+    membership ? getPendingVerificationTargetIds("developer") : Promise.resolve(new Set<string>()),
+  ]);
 
   return (
     <DashboardShell title="Desarrolladora" nav={NAV}>
@@ -37,7 +42,14 @@ export default async function DeveloperSettingsPage() {
       </p>
 
       {profile ? (
-        <DeveloperSettingsForm developerId={developerId} profile={profile} readOnly={!membership} />
+        <>
+          {membership && (
+            <div className="mb-5">
+              <RequestVerificationCard targetType="developer" targetId={profile.id} isVerified={profile.isVerified} pending={pendingIds.has(profile.id)} />
+            </div>
+          )}
+          <DeveloperSettingsForm developerId={developerId} profile={profile} readOnly={!membership} />
+        </>
       ) : (
         <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
           No pudimos cargar el perfil de la desarrolladora.

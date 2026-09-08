@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { getAgencyProfileRow } from "@/lib/data/agency-dashboard";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { AgencySettingsForm } from "@/components/dashboard/agency-settings-form";
+import { RequestVerificationCard } from "@/components/dashboard/request-verification-card";
+import { getPendingVerificationTargetIds } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Ajustes · Inmobiliaria", robots: { index: false } };
@@ -28,7 +30,10 @@ export default async function AgencySettingsPage() {
   const membership = user?.memberships.find((m) => m.organizationType === "agency");
   const agencyId = membership?.organizationId ?? demoAgencies[0]!.id;
 
-  const profile = await getAgencyProfileRow(agencyId);
+  const [profile, pendingIds] = await Promise.all([
+    getAgencyProfileRow(agencyId),
+    membership ? getPendingVerificationTargetIds("agency") : Promise.resolve(new Set<string>()),
+  ]);
 
   return (
     <DashboardShell title="Inmobiliaria" nav={NAV}>
@@ -39,6 +44,12 @@ export default async function AgencySettingsPage() {
       <p className="mb-5 text-sm text-muted-foreground">
         Esta información se muestra en la página pública de tu inmobiliaria.
       </p>
+
+      {profile && membership && (
+        <div className="mb-5">
+          <RequestVerificationCard targetType="agency" targetId={profile.id} isVerified={profile.isVerified} pending={pendingIds.has(profile.id)} />
+        </div>
+      )}
 
       {profile ? (
         <AgencySettingsForm agencyId={agencyId} profile={profile} readOnly={!membership} />

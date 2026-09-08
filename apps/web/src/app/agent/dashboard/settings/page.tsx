@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { getAgentProfileRow } from "@/lib/data/agent-dashboard";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { AgentSettingsForm } from "@/components/dashboard/agent-settings-form";
+import { RequestVerificationCard } from "@/components/dashboard/request-verification-card";
+import { getPendingVerificationTargetIds } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Ajustes · Asesor", robots: { index: false } };
@@ -25,7 +27,10 @@ const NAV: DashboardNavItem[] = [
 export default async function AgentSettingsPage() {
   const user = await getSessionUser();
   const agentId = user?.agentId ?? demoAgents[0]!.id;
-  const profile = await getAgentProfileRow(agentId);
+  const [profile, pendingIds] = await Promise.all([
+    getAgentProfileRow(agentId),
+    user?.agentId ? getPendingVerificationTargetIds("agent") : Promise.resolve(new Set<string>()),
+  ]);
 
   return (
     <DashboardShell title="Asesor" nav={NAV}>
@@ -37,6 +42,17 @@ export default async function AgentSettingsPage() {
         Idiomas y zonas de cobertura que se muestran en tu perfil público. La gestión de
         notificaciones y cuenta llega en una próxima fase.
       </p>
+
+      {profile && user?.agentId && (
+        <div className="mb-5">
+          <RequestVerificationCard
+            targetType="agent"
+            targetId={profile.id}
+            isVerified={profile.isVerified}
+            pending={pendingIds.has(profile.id)}
+          />
+        </div>
+      )}
 
       {profile ? (
         <AgentSettingsForm profile={profile} readOnly={!user?.agentId} />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { getAdminVerifications } from "@/lib/data/admin";
+import { getAdminVerifications, getPendingVerificationTargetIds } from "@/lib/data/admin";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import {
   AgencyVerificationTable,
@@ -40,7 +40,12 @@ export default async function AdminVerificationsPage({
 }) {
   const { tab } = await searchParams;
   const active: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : "properties";
-  const result = await getAdminVerifications();
+  const [result, requestedAgents, requestedAgencies] = await Promise.all([
+    getAdminVerifications(),
+    getPendingVerificationTargetIds("agent"),
+    getPendingVerificationTargetIds("agency"),
+  ]);
+  const pendingRequests = requestedAgents.size + requestedAgencies.size;
 
   return (
     <DashboardShell title="Admin" nav={NAV}>
@@ -49,6 +54,14 @@ export default async function AdminVerificationsPage({
         Otorga el sello Paradise Verified a propiedades, agentes e inmobiliarias que cumplen los
         criterios de confianza de la plataforma.
       </p>
+
+      {pendingRequests > 0 && (
+        <p className="mb-5 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
+          {pendingRequests} {pendingRequests === 1 ? "solicitud" : "solicitudes"} de verificación
+          pendiente{pendingRequests === 1 ? "" : "s"} — revísalas en las pestañas de Agentes e
+          Inmobiliarias.
+        </p>
+      )}
 
       {result ? (
         <>
