@@ -133,6 +133,80 @@ export function projectJsonLd(project: Project) {
   };
 }
 
+export function agentJsonLd(agent: {
+  fullName: string;
+  slug: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  agencyName?: string | null;
+  ratingAverage?: number | null;
+  ratingCount?: number;
+  areas?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: agent.fullName,
+    url: abs(`/agent/${agent.slug}`),
+    description: agent.bio ?? undefined,
+    image: agent.avatarUrl ?? undefined,
+    worksFor: agent.agencyName ? { "@type": "Organization", name: agent.agencyName } : undefined,
+    areaServed: (agent.areas ?? []).map((a) => ({ "@type": "Place", name: a })),
+    ...(agent.ratingAverage != null && (agent.ratingCount ?? 0) > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: agent.ratingAverage,
+            reviewCount: agent.ratingCount,
+            bestRating: 5,
+          },
+        }
+      : {}),
+  };
+}
+
+export function agencyJsonLd(agency: {
+  name: string;
+  slug: string;
+  description?: string | null;
+  logoUrl?: string | null;
+  website?: string | null;
+  phone?: string | null;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: agency.name,
+    url: abs(`/agency/${agency.slug}`),
+    description: agency.description ?? undefined,
+    logo: agency.logoUrl ?? undefined,
+    sameAs: agency.website ? [agency.website] : undefined,
+    telephone: agency.phone ?? undefined,
+    areaServed: { "@type": "Country", name: "República Dominicana" },
+  };
+}
+
+export function articleJsonLd(post: {
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  coverImageUrl?: string | null;
+  authorName: string;
+  publishedAt?: string | null;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt ?? undefined,
+    image: post.coverImageUrl ?? undefined,
+    url: abs(`/blog/${post.slug}`),
+    datePublished: post.publishedAt ?? undefined,
+    author: { "@type": "Organization", name: post.authorName },
+    publisher: { "@type": "Organization", name: SITE.name },
+  };
+}
+
 export function JsonLd({ data }: { data: object | object[] }) {
   const payload = Array.isArray(data) ? data : [data];
   return (

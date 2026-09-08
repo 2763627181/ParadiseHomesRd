@@ -12,6 +12,7 @@ import {
   listAgencies,
 } from "@/lib/data/people";
 import { env } from "@/lib/env";
+import { agencyJsonLd, JsonLd } from "@/lib/seo";
 import { Container } from "@/components/layout/container";
 import { Separator } from "@/components/ui/separator";
 import { VerifiedBadge } from "@/components/common/verified-badge";
@@ -57,6 +58,16 @@ export default async function AgencyPage({
 
   return (
     <>
+      <JsonLd
+        data={agencyJsonLd({
+          name: agency.name,
+          slug,
+          description: agency.description,
+          logoUrl: agency.logoUrl,
+          website: agency.website,
+          phone: agency.phone,
+        })}
+      />
       <section className="relative border-b border-border/70">
         {agency.coverImageUrl && (
           <div className="relative h-44 w-full overflow-hidden sm:h-56">

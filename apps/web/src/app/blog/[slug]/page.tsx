@@ -6,6 +6,7 @@ import { ChevronLeftIcon } from "lucide-react";
 import { formatDateRd } from "@paradise/utils/datetime";
 
 import { getPostBySlug, getPublishedSlugs } from "@/lib/data/blog";
+import { articleJsonLd, breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/blog/markdown";
@@ -39,6 +40,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <Container size="narrow" className="py-10 lg:py-14">
+      <JsonLd
+        data={[
+          articleJsonLd(post),
+          breadcrumbJsonLd([
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+        ]}
+      />
       <Link
         href="/blog"
         className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

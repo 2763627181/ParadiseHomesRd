@@ -10,6 +10,7 @@ import { getAgentBySlug, getAgentProperties, listAgents } from "@/lib/data/peopl
 import { getAgentReviews } from "@/lib/data/reviews";
 import { env } from "@/lib/env";
 import { AgentReviews } from "@/components/agent/agent-reviews";
+import { agentJsonLd, JsonLd } from "@/lib/seo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Container } from "@/components/layout/container";
 import { VerifiedBadge } from "@/components/common/verified-badge";
@@ -53,6 +54,19 @@ export default async function AgentPage({
   ]);
 
   return (
+    <>
+    <JsonLd
+      data={agentJsonLd({
+        fullName: agent.fullName,
+        slug,
+        bio: "bio" in agent ? agent.bio : null,
+        avatarUrl: agent.avatarUrl,
+        agencyName: agent.agencyName,
+        ratingAverage: agent.ratingAverage,
+        ratingCount: agent.ratingCount,
+        areas: "areas" in agent ? agent.areas : [],
+      })}
+    />
     <Container className="py-8 lg:py-12">
       <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -143,5 +157,6 @@ export default async function AgentPage({
         </div>
       </div>
     </Container>
+    </>
   );
 }

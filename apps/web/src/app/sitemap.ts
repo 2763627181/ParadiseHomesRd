@@ -5,6 +5,7 @@ import { env } from "@/lib/env";
 import { getAllPropertySlugs } from "@/lib/data/properties";
 import { getAllProjectSlugs } from "@/lib/data/projects";
 import { listAgencies, listAgents } from "@/lib/data/people";
+import { getPublishedPosts } from "@/lib/data/blog";
 
 export const revalidate = 3600;
 
@@ -23,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/partners",
     "/partners/apply",
     "/mortgage-calculator",
+    "/blog",
     "/faq",
     "/about",
     "/contact",
@@ -40,11 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const [propertySlugs, projectSlugs, agents, agencies] = await Promise.all([
+  const [propertySlugs, projectSlugs, agents, agencies, posts] = await Promise.all([
     getAllPropertySlugs(),
     getAllProjectSlugs(),
     listAgents(),
     listAgencies(),
+    getPublishedPosts(),
   ]);
 
   return [
@@ -64,5 +67,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...agents.map((a) => ({ url: `${base}/agent/${a.slug}`, lastModified: now, priority: 0.5 })),
     ...agencies.map((a) => ({ url: `${base}/agency/${a.slug}`, lastModified: now, priority: 0.5 })),
+    ...posts.map((p) => ({
+      url: `${base}/blog/${p.slug}`,
+      lastModified: p.publishedAt ? new Date(p.publishedAt) : now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }
