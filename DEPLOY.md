@@ -41,7 +41,7 @@ Copia los valores desde tu `apps/web/.env.local` local **excepto `NEXT_PUBLIC_AP
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xzczevhutiwigvlqwlpx.supabase.co` | igual que en local |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (el `eyJ...` `anon` de tu `.env.local`) | igual que en local |
 | `SUPABASE_SERVICE_ROLE_KEY` | (el `eyJ...` `service_role`) | **secreto** — solo server |
-| `NEXT_PUBLIC_APP_URL` | la URL de producción, p. ej. `https://paradisehomesrd.vercel.app` o tu dominio | **distinto a local** |
+| `NEXT_PUBLIC_APP_URL` | `https://paradise-homes-rd-web.vercel.app` (o tu dominio propio cuando lo tengas) | **distinto a local** |
 | `NEXT_PUBLIC_APP_NAME` | `Paradise Homes RD` | |
 | `NEXT_PUBLIC_ADMIN_WHATSAPP` | tu número (formato `1849...`) | |
 | `NEXT_PUBLIC_ADMIN_CONTACT_NAME` | tu nombre | |
@@ -50,8 +50,8 @@ Copia los valores desde tu `apps/web/.env.local` local **excepto `NEXT_PUBLIC_AP
 
 | Variable | Para qué |
 |---|---|
-| `RESEND_API_KEY` | Envío de **correos** de notificación (nuevo lead, mensaje, visita, verificación). Sin esta clave, las notificaciones **in-app siguen funcionando**, solo no salen correos. Crea la key gratis en [resend.com](https://resend.com) y verifica tu dominio. |
-| `RESEND_FROM_EMAIL` | Remitente, p. ej. `Paradise Homes RD <no-reply@tudominio.com>`. Debe ser de un dominio verificado en Resend. |
+| `RESEND_API_KEY` | Envío de **correos** de notificación (nuevo lead, mensaje, visita, verificación). Sin esta clave, las notificaciones **in-app siguen funcionando**, solo no salen correos. Crea la key en [resend.com](https://resend.com) con permiso **Sending access** (no hace falta Full access — la app solo envía correos, no administra dominios). |
+| `RESEND_FROM_EMAIL` | Remitente, p. ej. `Paradise Homes RD <notificaciones@tudominio.com>`. Debe ser de un **dominio verificado** en Resend. Si aún no tienes dominio propio, deja este módulo para después: Resend solo deja enviar desde `onboarding@resend.dev` **a tu propio correo verificado**, no a terceros. |
 | `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Mapas reales en `/map` y en el detalle. Sin ella se muestra un fallback. |
 | `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | ID de estilo del mapa de Google. |
 | `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_TIKTOK_PIXEL_ID` / `NEXT_PUBLIC_POSTHOG_KEY` | Analítica y píxeles (opcionales). |
@@ -66,10 +66,10 @@ Luego dale a **Deploy**.
 Ya que el login con Google funciona en local, para que funcione en producción:
 
 1. Supabase → **Authentication → URL Configuration**
-   - **Site URL**: la URL de producción (la misma que pusiste en `NEXT_PUBLIC_APP_URL`).
+   - **Site URL**: `https://paradise-homes-rd-web.vercel.app`
    - **Redirect URLs**: agrega
      ```
-     https://TU-DOMINIO/auth/callback
+     https://paradise-homes-rd-web.vercel.app/auth/callback
      ```
      (y déjala también para `http://localhost:3000/auth/callback` si sigues probando en local).
 
@@ -101,8 +101,12 @@ Después actualiza `NEXT_PUBLIC_APP_URL` y el Site URL / Redirect URL de Supabas
 - [ ] La home carga.
 - [ ] `/properties` lista propiedades reales.
 - [ ] Login con Google entra y te deja en `/dashboard`.
-- [ ] `/admin` bloquea el acceso si tu cuenta no es `ADMIN`/`SUPER_ADMIN`
-      (para promoverte: en el SQL Editor `update profiles set role = 'SUPER_ADMIN' where email = 'tu-correo';`).
+- [ ] `/admin` bloquea el acceso si tu cuenta no es `ADMIN`/`SUPER_ADMIN`.
+      Para promoverte, en el SQL Editor de Supabase:
+      ```sql
+      update profiles set role = 'SUPER_ADMIN' where email = 'joshuasteven486@gmail.com';
+      ```
+      (primero inicia sesión una vez en producción para que exista tu fila en `profiles`).
 - [ ] `/list-property` deja completar el wizard y subir fotos.
 - [ ] Enviar una consulta desde una propiedad crea el lead (revisa `/admin/leads`).
 - [ ] Con `RESEND_API_KEY`: al enviar ese lead llega un correo al asesor.
