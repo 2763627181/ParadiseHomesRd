@@ -68,11 +68,14 @@ Ya que el login con Google funciona en local, para que funcione en producción:
 
 1. Supabase → **Authentication → URL Configuration**
    - **Site URL**: `https://paradise-homes-rd-web.vercel.app`
-   - **Redirect URLs**: agrega
+   - **Redirect URLs**: agrega estas dos
      ```
      https://paradise-homes-rd-web.vercel.app/auth/callback
+     https://paradise-homes-rd-web.vercel.app/auth/set-password
      ```
-     (y déjala también para `http://localhost:3000/auth/callback` si sigues probando en local).
+     (`/auth/set-password` es donde aterrizan los correos de restablecer
+     contraseña y las invitaciones a socios/asesores). Deja también las
+     versiones `http://localhost:3000/...` si sigues probando en local.
 
 No hace falta tocar Google Cloud: el redirect de Google apunta a Supabase
 (`https://xzczevhutiwigvlqwlpx.supabase.co/auth/v1/callback`), que ya está configurado.

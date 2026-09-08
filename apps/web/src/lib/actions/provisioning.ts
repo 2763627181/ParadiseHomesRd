@@ -53,7 +53,7 @@ async function inviteUser(
 ): Promise<{ id: string } | { error: string }> {
   const { data, error } = await admin.auth.admin.inviteUserByEmail(input.email, {
     data: { full_name: input.fullName },
-    redirectTo: `${env.APP_URL}/auth/callback?next=${encodeURIComponent(input.redirectPath)}`,
+    redirectTo: `${env.APP_URL}/auth/set-password?next=${encodeURIComponent(input.redirectPath)}`,
   });
 
   if (error || !data?.user) {

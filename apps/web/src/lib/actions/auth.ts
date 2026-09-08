@@ -82,7 +82,7 @@ export async function forgotPasswordAction(input: unknown): Promise<AuthResult> 
   if (!supabase) return NOT_CONFIGURED;
 
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${env.APP_URL}/auth/callback?next=/dashboard/profile`,
+    redirectTo: `${env.APP_URL}/auth/set-password?next=/dashboard`,
   });
   return { ok: true, message: "Si el correo existe, te enviamos un enlace para restablecer la contraseña." };
 }

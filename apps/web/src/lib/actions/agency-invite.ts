@@ -58,7 +58,7 @@ export async function inviteAgentToAgency(input: {
 
   const { data, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: fullName },
-    redirectTo: `${env.APP_URL}/auth/callback?next=${encodeURIComponent("/agent/dashboard")}`,
+    redirectTo: `${env.APP_URL}/auth/set-password?next=${encodeURIComponent("/agent/dashboard")}`,
   });
   if (inviteError || !data?.user) {
     const message = inviteError?.message ?? "";

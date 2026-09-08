@@ -205,7 +205,7 @@ export default async function ProjectPage({
             <Separator />
             <section>
               <h2 className="mb-4 text-lg font-semibold">Inventario por unidad</h2>
-              <UnitTable units={project.units} />
+              <UnitTable units={project.units} projectId={project.id} projectName={project.name} />
             </section>
 
             {defaultPlan && (
