@@ -28,6 +28,7 @@ import {
 } from "@/features/list-property/wizard-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -356,11 +357,10 @@ function StepPrice() {
       {!data.priceOnRequest && (
         <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
           <Field label="Precio">
-            <Input
-              inputMode="numeric"
-              value={data.price}
-              onChange={(e) => patch({ price: e.target.value.replace(/[^\d.]/g, "") })}
-              placeholder="185000"
+            <MoneyInput
+              value={data.price ? Number(data.price) : null}
+              onChange={(n) => patch({ price: n == null ? "" : String(n) })}
+              placeholder="185,000"
             />
           </Field>
           <Field label="Moneda">
@@ -382,10 +382,9 @@ function StepPrice() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Mantenimiento mensual (opcional)">
-          <Input
-            inputMode="numeric"
-            value={data.maintenanceFee}
-            onChange={(e) => patch({ maintenanceFee: e.target.value.replace(/[^\d.]/g, "") })}
+          <MoneyInput
+            value={data.maintenanceFee ? Number(data.maintenanceFee) : null}
+            onChange={(n) => patch({ maintenanceFee: n == null ? "" : String(n) })}
             placeholder="0"
           />
         </Field>

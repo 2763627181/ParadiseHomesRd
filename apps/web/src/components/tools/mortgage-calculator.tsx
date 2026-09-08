@@ -5,9 +5,9 @@ import { calculateMortgage, MORTGAGE_DISCLAIMER } from "@paradise/utils/mortgage
 import { formatPrice, type CurrencyCode } from "@paradise/utils/currency";
 
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { MoneyInput } from "@/components/ui/money-input";
 
 export function MortgageCalculator({
   defaultPrice = 200000,
@@ -18,7 +18,7 @@ export function MortgageCalculator({
   currency?: CurrencyCode;
   className?: string;
 }) {
-  const [price, setPrice] = React.useState(defaultPrice);
+  const [price, setPrice] = React.useState<number | null>(defaultPrice);
   const [downPct, setDownPct] = React.useState(20);
   const [rate, setRate] = React.useState(currency === "USD" ? 7.5 : 11.5);
   const [years, setYears] = React.useState(20);
@@ -26,7 +26,7 @@ export function MortgageCalculator({
   const result = React.useMemo(
     () =>
       calculateMortgage({
-        price,
+        price: price ?? 0,
         downPayment: downPct,
         downPaymentIsPercent: true,
         annualRatePercent: rate,
@@ -40,12 +40,7 @@ export function MortgageCalculator({
       <div className="space-y-6 rounded-2xl border border-border/70 bg-card p-6">
         <div className="space-y-2">
           <Label htmlFor="mc-price">Precio de la propiedad</Label>
-          <Input
-            id="mc-price"
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Math.max(0, Number(e.target.value)))}
-          />
+          <MoneyInput id="mc-price" value={price} onChange={setPrice} placeholder="Ej. 200,000" />
         </div>
 
         <SliderField

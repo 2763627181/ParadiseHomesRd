@@ -52,14 +52,24 @@ export function PartnerApplicationForm() {
 
   const [locationsInput, setLocationsInput] = React.useState("");
 
+  // Mantiene el campo `locations` del formulario sincronizado con el texto,
+  // para que la validación de zod (min. 1 zona) vea el valor real.
+  const parseLocations = (raw: string) =>
+    raw
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  const onLocationsChange = (raw: string) => {
+    setLocationsInput(raw);
+    form.setValue("locations", parseLocations(raw), { shouldValidate: form.formState.isSubmitted });
+  };
+
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
     const result = await submitPartnerApplication({
       ...values,
-      locations: locationsInput
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      locations: parseLocations(locationsInput),
     });
     if (result.ok) {
       analytics.track("lead_created", { props: { channel: "partner_application" } });
@@ -164,7 +174,7 @@ export function PartnerApplicationForm() {
         >
           <Input
             value={locationsInput}
-            onChange={(e) => setLocationsInput(e.target.value)}
+            onChange={(e) => onLocationsChange(e.target.value)}
             placeholder="Piantini, Punta Cana, Santiago…"
           />
         </Field>

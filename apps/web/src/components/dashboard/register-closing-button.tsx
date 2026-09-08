@@ -9,6 +9,7 @@ import { formatPrice } from "@paradise/utils/currency";
 import { registerClosing } from "@/lib/actions/closings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -44,14 +45,14 @@ export function RegisterClosingButton({
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [pending, setPending] = React.useState(false);
-  const [amount, setAmount] = React.useState("");
+  const [amount, setAmount] = React.useState<number | null>(null);
   const [currency, setCurrency] = React.useState<"USD" | "DOP">(defaultCurrency);
   const [closedAt, setClosedAt] = React.useState(today());
   const [percent, setPercent] = React.useState("5");
   const [partnerName, setPartnerName] = React.useState("");
   const [notes, setNotes] = React.useState("");
 
-  const amountNum = Number(amount) || 0;
+  const amountNum = amount ?? 0;
   const percentNum = Number(percent) || 0;
   const commissionPreview = Math.round((amountNum * percentNum) / 100 * 100) / 100;
 
@@ -103,11 +104,10 @@ export function RegisterClosingButton({
             <div className="grid grid-cols-[1fr_7rem] gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="closing-amount">Monto del cierre</Label>
-                <Input
+                <MoneyInput
                   id="closing-amount"
-                  inputMode="decimal"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={setAmount}
                   placeholder="0"
                   required
                   disabled={pending}
