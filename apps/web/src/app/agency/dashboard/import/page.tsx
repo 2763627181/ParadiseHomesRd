@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
+import { getSessionUser } from "@/lib/auth";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { DashboardComingSoon } from "@/components/dashboard/dashboard-coming-soon";
+import { CsvImport } from "@/components/dashboard/csv-import";
 
 export const metadata: Metadata = { title: "Importar · Inmobiliaria", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/agency/dashboard", icon: "overview" },
@@ -18,14 +20,17 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/agency/dashboard/settings", icon: "settings" },
 ];
 
-export default function AgencyImportPage() {
+export default async function AgencyImportPage() {
+  const user = await getSessionUser();
+  const canImport = Boolean(user?.memberships.some((m) => m.organizationType === "agency"));
+
   return (
     <DashboardShell title="Inmobiliaria" nav={NAV}>
-      <h1 className="mb-5 text-xl font-semibold tracking-tight">Importar</h1>
-      <DashboardComingSoon
-        title="Importación masiva de inventario"
-        description="Sube un CSV con tu inventario completo y publica decenas de propiedades a la vez."
-      />
+      <h1 className="mb-1 text-xl font-semibold tracking-tight">Importar inventario</h1>
+      <p className="mb-5 text-sm text-muted-foreground">
+        Sube un CSV con tus propiedades y créalas todas de una vez. Hasta 200 por archivo.
+      </p>
+      <CsvImport canImport={canImport} />
     </DashboardShell>
   );
 }
