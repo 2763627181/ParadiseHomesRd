@@ -8,6 +8,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { getSessionUser, isAgencyUser, isStaffUser } from "@/lib/auth";
 import {
+  buildImageRows,
   normalizeListingPayload,
   resolveAgentAgencyId,
   resolveLocationIds,
@@ -150,16 +151,9 @@ export async function updatePropertyListing(propertyId: string, raw: any): Promi
     // que diffear contra lo existente).
     await admin.from("property_images").delete().eq("property_id", propertyId);
     if (data.images.length) {
-      const { error: imgError } = await admin.from("property_images").insert(
-        data.images.map((img, i) => ({
-          property_id: propertyId,
-          url: img.url,
-          storage_path: img.storagePath,
-          alt: img.alt ?? null,
-          position: i,
-          is_cover: img.isCover || i === 0,
-        })),
-      );
+      const { error: imgError } = await admin
+        .from("property_images")
+        .insert(buildImageRows(propertyId, data.images));
       if (imgError) throw imgError;
     }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   ATTRIBUTION_COOKIE,
   deriveLeadSource,
@@ -61,16 +62,17 @@ export async function submitLead(input: unknown): Promise<LeadActionResult> {
   if (!admin) return { ok: false, message: "El servicio no está disponible en este momento." };
 
   try {
-    // upsert contacto (dedupe por teléfono)
-    const { data: contact, error: contactError } = await admin
-      .from("contacts")
-      .upsert(
-        { full_name: data.fullName, phone: data.phone, email: data.email ?? null, whatsapp: data.phone },
-        { onConflict: "phone" },
-      )
-      .select("id")
-      .single();
-    if (contactError || !contact) throw contactError ?? new Error("contact");
+    // Dedupe de contacto por teléfono. `contacts` tiene índices únicos en
+    // teléfono Y en correo, así que un `.upsert({ onConflict: "phone" })` a
+    // secas revienta cuando alguien usa un correo que ya es de otro contacto
+    // (teléfono nuevo + correo repetido). Resolvemos a mano: el teléfono manda
+    // y el correo solo se guarda si no pisa a nadie.
+    const contactId = await upsertContact(admin, {
+      fullName: data.fullName,
+      phone: data.phone,
+      email: data.email ?? null,
+    });
+    const contact = { id: contactId };
 
     const { data: lead, error: leadError } = await admin
       .from("leads")
@@ -192,6 +194,57 @@ export async function submitVisitRequest(input: unknown): Promise<LeadActionResu
   }
 
   return result;
+}
+
+/**
+ * Encuentra o crea el contacto del lead. Deduplica por teléfono (el
+ * identificador real de un lead en RD). El correo es opcional y solo se
+ * escribe si ningún otro contacto lo tiene ya, para no chocar con el índice
+ * único `contacts_email_key`.
+ */
+async function upsertContact(
+  admin: SupabaseClient,
+  input: { fullName: string; phone: string; email: string | null },
+): Promise<string> {
+  const { data: existing } = await admin
+    .from("contacts")
+    .select("id")
+    .eq("phone", input.phone)
+    .maybeSingle();
+
+  let email: string | null | undefined = input.email;
+  if (email) {
+    const { data: emailOwner } = await admin
+      .from("contacts")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+    if (emailOwner && emailOwner.id !== existing?.id) {
+      // Ese correo ya es de otro contacto: no lo tocamos (ni al crear ni al
+      // actualizar) para no violar el índice único ni borrar el correo ajeno.
+      email = existing ? undefined : null;
+    }
+  }
+
+  if (existing) {
+    const patch: Record<string, unknown> = { full_name: input.fullName, whatsapp: input.phone };
+    if (email !== undefined) patch.email = email;
+    await admin.from("contacts").update(patch).eq("id", existing.id);
+    return existing.id as string;
+  }
+
+  const { data: created, error } = await admin
+    .from("contacts")
+    .insert({
+      full_name: input.fullName,
+      phone: input.phone,
+      email: email ?? null,
+      whatsapp: input.phone,
+    })
+    .select("id")
+    .single();
+  if (error || !created) throw error ?? new Error("contact");
+  return created.id as string;
 }
 
 function flatten(error: { issues: { path: PropertyKey[]; message: string }[] }): Record<string, string> {

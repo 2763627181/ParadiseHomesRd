@@ -61,6 +61,32 @@ export function normalizeListingPayload(raw: any) {
   };
 }
 
+/**
+ * Filas para `property_images` con EXACTAMENTE una portada.
+ *
+ * `property_images` tiene un índice único parcial `(property_id) where is_cover`,
+ * así que un `is_cover: img.isCover || i === 0` marcaba DOS portadas cuando el
+ * usuario elegía como portada una foto que no es la primera → el insert entero
+ * fallaba y la propiedad se guardaba sin fotos.
+ */
+export function buildImageRows(
+  propertyId: string,
+  images: { storagePath?: string | null; url: string; isCover?: boolean; alt?: string | null }[],
+) {
+  const coverIdx = Math.max(
+    0,
+    images.findIndex((img) => img.isCover),
+  );
+  return images.map((img, i) => ({
+    property_id: propertyId,
+    url: img.url,
+    storage_path: img.storagePath ?? null,
+    alt: img.alt ?? null,
+    position: i,
+    is_cover: i === coverIdx,
+  }));
+}
+
 /** Resuelve slugs de ubicación (provincia/municipio/sector) a sus ids en `locations`. */
 export async function resolveLocationIds(
   admin: any,

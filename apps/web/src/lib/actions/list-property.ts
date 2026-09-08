@@ -10,6 +10,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth";
 import {
+  buildImageRows,
   normalizeListingPayload,
   resolveAgentAgencyId,
   resolveLocationIds,
@@ -126,16 +127,16 @@ export async function submitPropertyListing(raw: any): Promise<ListingResult> {
     await admin.from("properties").update({ slug: finalSlug }).eq("id", propertyId);
 
     if (data.images.length) {
-      await admin.from("property_images").insert(
-        data.images.map((img, i) => ({
-          property_id: propertyId,
-          url: img.url,
-          storage_path: img.storagePath,
-          alt: img.alt ?? null,
-          position: i,
-          is_cover: img.isCover || i === 0,
-        })),
-      );
+      const { error: imgErr } = await admin
+        .from("property_images")
+        .insert(buildImageRows(propertyId, data.images));
+      if (imgErr) {
+        // Sin las fotos la publicación no sirve: deshacemos la fila recién
+        // creada para que el usuario pueda reintentar sin dejar duplicados.
+        console.error("[submitPropertyListing] property_images", imgErr);
+        await admin.from("properties").delete().eq("id", propertyId);
+        return { ok: false, message: "No pudimos guardar las fotos. Intenta de nuevo." };
+      }
     }
 
     if (data.amenityKeys.length) {
