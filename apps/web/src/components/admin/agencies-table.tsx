@@ -6,6 +6,7 @@ import { formatDateRd } from "@paradise/utils/datetime";
 import type { AdminAgencyRow } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 
 export function AgenciesTable({ rows }: { rows: AdminAgencyRow[] }) {
   if (rows.length === 0) {
@@ -73,6 +74,7 @@ export function AgenciesTable({ rows }: { rows: AdminAgencyRow[] }) {
                       <ExternalLinkIcon className="size-4" />
                     </Link>
                   </Button>
+                  <AdminDeleteButton kind="agency" id={row.id} name={row.name} />
                 </div>
               </td>
             </tr>

@@ -6,6 +6,7 @@ import { formatDateRd } from "@paradise/utils/datetime";
 import type { AdminProjectRow } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 
 const STATUS_LABEL: Record<string, string> = {
   [PROJECT_STATUS.PRE_SALE]: "En preventa",
@@ -89,6 +90,7 @@ export function ProjectsTable({ rows }: { rows: AdminProjectRow[] }) {
                         <ExternalLinkIcon className="size-4" />
                       </Link>
                     </Button>
+                    <AdminDeleteButton kind="project" id={row.id} name={row.name} />
                   </div>
                 </td>
               </tr>

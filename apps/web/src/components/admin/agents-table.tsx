@@ -5,6 +5,7 @@ import { ExternalLinkIcon, StarIcon } from "lucide-react";
 import type { AdminAgentRow } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 
 export function AgentsTable({ rows }: { rows: AdminAgentRow[] }) {
   if (rows.length === 0) {
@@ -76,6 +77,7 @@ export function AgentsTable({ rows }: { rows: AdminAgentRow[] }) {
                       <ExternalLinkIcon className="size-4" />
                     </Link>
                   </Button>
+                  <AdminDeleteButton kind="agent" id={row.id} name={row.fullName} />
                 </div>
               </td>
             </tr>

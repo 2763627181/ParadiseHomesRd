@@ -6,6 +6,7 @@ import { formatDateRd } from "@paradise/utils/datetime";
 import type { AdminDeveloperRow } from "@/lib/data/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 
 export function DevelopersTable({ rows }: { rows: AdminDeveloperRow[] }) {
   if (rows.length === 0) {
@@ -69,6 +70,7 @@ export function DevelopersTable({ rows }: { rows: AdminDeveloperRow[] }) {
                       <ExternalLinkIcon className="size-4" />
                     </Link>
                   </Button>
+                  <AdminDeleteButton kind="developer" id={row.id} name={row.name} />
                 </div>
               </td>
             </tr>

@@ -17,6 +17,7 @@ import {
   unpublishProperty,
 } from "@/lib/actions/moderation";
 import type { AdminPropertyRow } from "@/lib/data/admin";
+import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -88,7 +89,12 @@ export function PropertyModerationTable({ rows }: { rows: AdminPropertyRow[] }) 
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="line-clamp-1 font-medium">{row.title}</p>
+                        <Link
+                          href={`/admin/properties/${row.id}`}
+                          className="line-clamp-1 font-medium hover:underline"
+                        >
+                          {row.title}
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                           {row.code} · {PROPERTY_TYPE_LABELS[row.propertyType as keyof typeof PROPERTY_TYPE_LABELS] ?? row.propertyType}
                           {" · "}
@@ -126,11 +132,16 @@ export function PropertyModerationTable({ rows }: { rows: AdminPropertyRow[] }) 
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Button asChild variant="ghost" size="icon-sm" title="Ver">
-                        <Link href={`/property/${row.slug}`} target="_blank">
-                          <ExternalLinkIcon className="size-4" />
-                        </Link>
+                      <Button asChild variant="ghost" size="sm" title="Ver detalle en admin">
+                        <Link href={`/admin/properties/${row.id}`}>Ver</Link>
                       </Button>
+                      {row.status === "PUBLISHED" && (
+                        <Button asChild variant="ghost" size="icon-sm" title="Ver página pública">
+                          <Link href={`/property/${row.slug}`} target="_blank">
+                            <ExternalLinkIcon className="size-4" />
+                          </Link>
+                        </Button>
+                      )}
                       {row.status !== "PUBLISHED" && (
                         <Button
                           size="sm"
@@ -165,6 +176,7 @@ export function PropertyModerationTable({ rows }: { rows: AdminPropertyRow[] }) 
                           Despublicar
                         </Button>
                       )}
+                      <AdminDeleteButton kind="property" id={row.id} name={row.title} />
                     </div>
                   </td>
                 </tr>
