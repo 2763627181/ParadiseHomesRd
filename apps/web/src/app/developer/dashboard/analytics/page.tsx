@@ -9,6 +9,7 @@ const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/developer/dashboard", icon: "overview" },
   { label: "Proyectos", href: "/developer/dashboard/projects", icon: "buildings" },
   { label: "Leads", href: "/developer/dashboard/leads", icon: "leads" },
+  { label: "Cierres", href: "/developer/dashboard/closings", icon: "closings" },
   { label: "Analytics", href: "/developer/dashboard/analytics", icon: "analytics" },
   { label: "Ajustes", href: "/developer/dashboard/settings", icon: "settings" },
 ];

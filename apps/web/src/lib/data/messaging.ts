@@ -2,8 +2,6 @@ import "server-only";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /* ─────────────────────────────────────────────────────────────────────────────
  * Capa de datos de mensajería cliente ↔ asesor.
  *

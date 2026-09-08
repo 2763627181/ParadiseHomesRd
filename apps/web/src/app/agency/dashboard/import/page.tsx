@@ -11,6 +11,8 @@ const NAV: DashboardNavItem[] = [
   { label: "Proyectos", href: "/agency/dashboard/projects", icon: "buildings" },
   { label: "Asesores", href: "/agency/dashboard/agents", icon: "users" },
   { label: "Leads", href: "/agency/dashboard/leads", icon: "leads" },
+  { label: "Visitas", href: "/agency/dashboard/visits", icon: "visits" },
+  { label: "Cierres", href: "/agency/dashboard/closings", icon: "closings" },
   { label: "Importar", href: "/agency/dashboard/import", icon: "import" },
   { label: "Analytics", href: "/agency/dashboard/analytics", icon: "analytics" },
   { label: "Ajustes", href: "/agency/dashboard/settings", icon: "settings" },

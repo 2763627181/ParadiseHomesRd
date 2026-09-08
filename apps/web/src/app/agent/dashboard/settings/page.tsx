@@ -16,6 +16,7 @@ const NAV: DashboardNavItem[] = [
   { label: "Leads", href: "/agent/dashboard/leads", icon: "leads" },
   { label: "Agenda", href: "/agent/dashboard/calendar", icon: "calendar" },
   { label: "Mensajes", href: "/agent/dashboard/messages", icon: "messages" },
+  { label: "Cierres", href: "/agent/dashboard/closings", icon: "closings" },
   { label: "Analytics", href: "/agent/dashboard/analytics", icon: "analytics" },
   { label: "Perfil", href: "/agent/dashboard/profile", icon: "profile" },
   { label: "Ajustes", href: "/agent/dashboard/settings", icon: "settings" },

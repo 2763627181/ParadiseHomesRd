@@ -2,8 +2,6 @@ import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /* ─────────────────────────────────────────────────────────────────────────────
  * Capa de datos de notificaciones in-app (`notifications`). Las filas las crea
  * `lib/notify.ts` con el cliente admin; aquí solo LEEMOS con el cliente server

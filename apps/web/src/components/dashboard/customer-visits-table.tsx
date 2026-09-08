@@ -6,6 +6,7 @@ import { ROUTES, type VisitStatus } from "@paradise/config";
 
 import type { CustomerVisit } from "@/lib/data/customer";
 import { Badge } from "@/components/ui/badge";
+import { CancelVisitButton } from "@/components/dashboard/cancel-visit-button";
 
 const VISIT_STATUS_LABELS_ES: Record<VisitStatus, string> = {
   REQUESTED: "Solicitada",
@@ -64,6 +65,12 @@ export function CustomerVisitsTable({ visits }: { visits: CustomerVisit[] }) {
             <p className="mt-3 line-clamp-2 rounded-lg bg-secondary p-3 text-sm text-muted-foreground">
               {visit.notes}
             </p>
+          )}
+
+          {(visit.status === "REQUESTED" || visit.status === "SCHEDULED") && (
+            <div className="mt-3 flex justify-end">
+              <CancelVisitButton visitId={visit.id} label="Cancelar visita" />
+            </div>
           )}
 
           {visit.agentName && (

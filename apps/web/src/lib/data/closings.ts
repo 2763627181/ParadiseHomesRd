@@ -6,8 +6,6 @@ import { formatPrice, type CurrencyCode } from "@paradise/utils/currency";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Cierres y comisiones (registro interno). La plataforma NO procesa dinero:
  * `closings` es el libro de ventas/alquileres cerrados y `commissions` la

@@ -9,8 +9,6 @@ import { getSessionUser, isStaffUser } from "@/lib/auth";
 import { notifyAgent, notifyLeadContact } from "@/lib/notify";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface VisitActionResult {
   ok: boolean;
   message?: string;

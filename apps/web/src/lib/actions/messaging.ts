@@ -8,8 +8,6 @@ import { getMessages, messagePreview, type ChatMessage } from "@/lib/data/messag
 import { notifyAgent, notifyUser } from "@/lib/notify";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface MessagingResult {
   ok: boolean;
   message?: string;

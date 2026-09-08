@@ -7,6 +7,7 @@ import { ROUTES, type LeadStatus } from "@paradise/config";
 import { STATUS_LABELS_ES } from "@/lib/lead-status";
 import type { CustomerInquiry } from "@/lib/data/customer";
 import { Badge } from "@/components/ui/badge";
+import { StartConversationButton } from "@/components/messaging/start-conversation-button";
 
 // Duplicado (no importado) de `STATUS_VARIANT` de `leads-table.tsx` a propósito:
 // ese archivo es "use client" y este es un Server Component — mejor no cruzar
@@ -66,34 +67,41 @@ export function CustomerInquiriesTable({ inquiries }: { inquiries: CustomerInqui
               </p>
             )}
 
-            {inquiry.agentName && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3 text-sm">
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3 text-sm">
+              {inquiry.agentName && (
                 <span className="text-muted-foreground">Asesor: {inquiry.agentName}</span>
-                {(inquiry.agentWhatsapp || inquiry.agentPhone) && (
-                  <a
-                    href={buildWhatsappUrl({
-                      phone: inquiry.agentWhatsapp || inquiry.agentPhone!,
-                      message: `Hola ${inquiry.agentName}, te escribo por mi consulta ${inquiry.leadCode} en Paradise Homes RD.`,
-                    })}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-verified hover:bg-secondary"
-                  >
-                    <MessageCircleIcon className="size-3.5" />
-                    WhatsApp
-                  </a>
-                )}
-                {inquiry.agentPhone && (
-                  <a
-                    href={`tel:+1${inquiry.agentPhone}`}
-                    className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                  >
-                    <PhoneIcon className="size-3.5" />
-                    {inquiry.agentPhone}
-                  </a>
-                )}
-              </div>
-            )}
+              )}
+              <StartConversationButton
+                leadId={inquiry.id}
+                variant="buyer"
+                label="Enviar mensaje"
+                size="sm"
+                buttonVariant="outline"
+              />
+              {(inquiry.agentWhatsapp || inquiry.agentPhone) && (
+                <a
+                  href={buildWhatsappUrl({
+                    phone: inquiry.agentWhatsapp || inquiry.agentPhone!,
+                    message: `Hola ${inquiry.agentName ?? ""}, te escribo por mi consulta ${inquiry.leadCode} en Paradise Homes RD.`,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-verified hover:bg-secondary"
+                >
+                  <MessageCircleIcon className="size-3.5" />
+                  WhatsApp
+                </a>
+              )}
+              {inquiry.agentPhone && (
+                <a
+                  href={`tel:+1${inquiry.agentPhone}`}
+                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                >
+                  <PhoneIcon className="size-3.5" />
+                  {inquiry.agentPhone}
+                </a>
+              )}
+            </div>
           </div>
         );
       })}

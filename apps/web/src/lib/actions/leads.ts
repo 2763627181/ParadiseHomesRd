@@ -11,10 +11,13 @@ import { leadFormSchema, scheduleVisitSchema } from "@paradise/validation";
 
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/auth";
+import { notifyAgent } from "@/lib/notify";
 
 export interface LeadActionResult {
   ok: boolean;
   leadCode?: string;
+  leadId?: string;
   message?: string;
   fieldErrors?: Record<string, string>;
 }
@@ -92,11 +95,55 @@ export async function submitLead(input: unknown): Promise<LeadActionResult> {
         first_touch: snapshot?.firstTouch ?? null,
         last_touch: snapshot?.lastTouch ?? null,
       })
-      .select("lead_code")
+      .select("id, lead_code")
       .single();
     if (leadError || !lead) throw leadError ?? new Error("lead");
 
-    return { ok: true, leadCode: lead.lead_code };
+    // Post-proceso: enlazar cuenta, abrir conversación y avisar al asesor.
+    // Un fallo aquí nunca invalida el lead ya creado.
+    try {
+      const sessionUser = await getSessionUser();
+      if (sessionUser) {
+        await admin
+          .from("contacts")
+          .update({ profile_id: sessionUser.id })
+          .eq("id", contact.id)
+          .is("profile_id", null);
+
+        const { data: conv } = await admin
+          .from("conversations")
+          .insert({
+            lead_id: lead.id,
+            property_id: data.propertyId ?? null,
+            agent_id: data.agentId ?? null,
+            buyer_id: sessionUser.id,
+          })
+          .select("id")
+          .single();
+        if (conv?.id && data.message?.trim()) {
+          await admin.from("messages").insert({
+            conversation_id: conv.id,
+            sender_id: sessionUser.id,
+            body: data.message.trim(),
+          });
+          await admin.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", conv.id);
+        }
+      }
+
+      if (data.agentId) {
+        await notifyAgent(data.agentId, {
+          type: "lead_new",
+          title: `Nuevo lead: ${data.fullName}`,
+          body: data.message?.trim() || `Consulta ${data.propertyCode ?? ""}`.trim() || "Nueva consulta",
+          payload: { leadId: lead.id, href: `/agent/dashboard/leads/${lead.id}` },
+          email: true,
+        });
+      }
+    } catch (postErr) {
+      console.error("[lead] post-proceso", postErr);
+    }
+
+    return { ok: true, leadCode: lead.lead_code, leadId: lead.id };
   } catch (error) {
     console.error("[lead] error", error);
     return { ok: false, message: "No pudimos registrar tu solicitud. Intenta por WhatsApp." };
@@ -111,7 +158,7 @@ export async function submitVisitRequest(input: unknown): Promise<LeadActionResu
   const data = parsed.data;
   if (data.website) return { ok: true, leadCode: "PH-L-000000" };
 
-  return submitLead({
+  const result = await submitLead({
     fullName: data.fullName,
     phone: data.phone,
     email: data.email,
@@ -125,6 +172,26 @@ export async function submitVisitRequest(input: unknown): Promise<LeadActionResu
     agentId: data.agentId,
     consent: data.consent,
   });
+
+  // Además del lead, deja constancia de la visita pedida para la agenda del asesor.
+  if (result.ok && result.leadId && isSupabaseConfigured) {
+    try {
+      const admin = getSupabaseAdminClient();
+      await admin?.from("visits").insert({
+        visit_code: "",
+        lead_id: result.leadId,
+        property_id: data.propertyId ?? null,
+        unit_id: data.unitId ?? null,
+        agent_id: data.agentId ?? null,
+        status: "REQUESTED",
+        notes: `Preferencia: ${data.preferredDate} (${data.preferredTimeSlot}). ${data.notes ?? ""}`.trim(),
+      });
+    } catch (err) {
+      console.error("[visit] insert", err);
+    }
+  }
+
+  return result;
 }
 
 function flatten(error: { issues: { path: PropertyKey[]; message: string }[] }): Record<string, string> {

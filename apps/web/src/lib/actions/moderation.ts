@@ -4,10 +4,49 @@ import { revalidatePath } from "next/cache";
 
 import { getSessionUser, isStaffUser } from "@/lib/auth";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
+import { notifyAgent, notifyUser } from "@/lib/notify";
 
 export interface ModerationResult {
   ok: boolean;
   message?: string;
+}
+
+/** Avisa al dueño del perfil y al agente (si es distinto) sobre el resultado de moderación. */
+async function notifyPropertyOwners(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
+  propertyId: string,
+  outcome: "approved" | "rejected",
+  rejectReason?: string,
+): Promise<void> {
+  try {
+    const { data } = await admin
+      .from("properties")
+      .select("owner_profile_id, agent_id, slug, title")
+      .eq("id", propertyId)
+      .maybeSingle();
+    if (!data) return;
+    const p = data as any;
+
+    const payload =
+      outcome === "approved"
+        ? {
+            type: "property_approved",
+            title: "Tu propiedad fue aprobada",
+            body: p.title as string,
+            payload: { propertyId, href: `/property/${p.slug}` },
+          }
+        : {
+            type: "property_rejected",
+            title: "Tu propiedad necesita cambios",
+            body: (rejectReason ?? "Revisa los comentarios del equipo.") as string,
+            payload: { propertyId, href: `/list-property?edit=${propertyId}` },
+          };
+
+    if (p.owner_profile_id) await notifyUser({ userId: p.owner_profile_id, email: true, ...payload });
+    if (p.agent_id) await notifyAgent(p.agent_id, { email: true, ...payload });
+  } catch (err) {
+    console.error("[notifyPropertyOwners]", err);
+  }
 }
 
 async function guard() {
@@ -47,6 +86,8 @@ export async function approveProperty(id: string): Promise<ModerationResult> {
     reason: "Aprobada y verificada",
   });
 
+  await notifyPropertyOwners(admin, id, "approved");
+
   revalidatePath("/admin/properties");
   revalidatePath("/properties");
   return { ok: true };
@@ -77,6 +118,8 @@ export async function rejectProperty(id: string, reason: string): Promise<Modera
     actor_id: user!.id,
     reason: reason.trim(),
   });
+
+  await notifyPropertyOwners(admin, id, "rejected", reason.trim());
 
   revalidatePath("/admin/properties");
   return { ok: true };

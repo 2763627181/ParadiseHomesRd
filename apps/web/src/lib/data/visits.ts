@@ -4,8 +4,6 @@ import type { VisitStatus } from "@paradise/config";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /* ─────────────────────────────────────────────────────────────────────────────
  * Capa de datos de la agenda de visitas (vista del asesor / agencia). Siempre
  * con cliente admin: la autorización se resuelve en la página (agentId de la

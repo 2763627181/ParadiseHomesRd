@@ -3,8 +3,6 @@ import "server-only";
 import { env, serverEnv } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Notificaciones: siempre se crea la fila in-app en `notifications`; si hay
  * `RESEND_API_KEY` configurada, además se envía un correo (Resend REST API,
