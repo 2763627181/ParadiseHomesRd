@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getNotificationsForUser, getUnreadCount } from "@/lib/data/notifications";
+import { getUnreadMessageCountForProfile } from "@/lib/data/messaging";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,10 +27,11 @@ export async function GET(request: NextRequest) {
   const rawLimit = Number(request.nextUrl.searchParams.get("limit") ?? 8);
   const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(rawLimit, 50)) : 8;
 
-  const [items, unread] = await Promise.all([
+  const [items, unread, messagesUnread] = await Promise.all([
     getNotificationsForUser(user.id, { limit }),
     getUnreadCount(user.id),
+    getUnreadMessageCountForProfile(user.id),
   ]);
 
-  return NextResponse.json({ items, unread }, { headers: NO_STORE });
+  return NextResponse.json({ items, unread, messagesUnread }, { headers: NO_STORE });
 }

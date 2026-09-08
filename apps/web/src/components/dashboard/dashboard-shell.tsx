@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { NavUnreadBadge } from "@/components/dashboard/nav-unread-badge";
 import {
   Sheet,
   SheetContent,
@@ -113,6 +114,9 @@ export function DashboardShell({
           >
             <Icon className="size-4" />
             {item.label}
+            {(item.icon === "messages" || item.icon === "notifications") && (
+              <NavUnreadBadge kind={item.icon} />
+            )}
           </Link>
         );
       })}

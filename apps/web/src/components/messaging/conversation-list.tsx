@@ -90,7 +90,7 @@ export function ConversationList({
                   </p>
                   {unread && (
                     <span
-                      className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary-foreground"
+                      className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white"
                       aria-label={`${c.unreadCount} sin leer`}
                     >
                       {c.unreadCount > 99 ? "99+" : c.unreadCount}

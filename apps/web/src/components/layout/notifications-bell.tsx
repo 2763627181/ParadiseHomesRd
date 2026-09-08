@@ -18,9 +18,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 interface NotificationsResponse {
   items: NotificationRow[];
   unread: number;
+  messagesUnread?: number;
 }
 
-const EMPTY: NotificationsResponse = { items: [], unread: 0 };
+const EMPTY: NotificationsResponse = { items: [], unread: 0, messagesUnread: 0 };
 export const NOTIFICATIONS_QUERY_KEY = ["notifications"] as const;
 
 /**
@@ -154,7 +155,7 @@ export function NotificationsBell() {
           {unread > 0 && (
             <span
               aria-hidden
-              className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground ring-2 ring-background"
+              className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-background"
             >
               {unread > 9 ? "9+" : unread}
             </span>
@@ -206,7 +207,7 @@ export function NotificationsBell() {
                         aria-hidden
                         className={cn(
                           "mt-1.5 size-2 shrink-0 rounded-full",
-                          isUnread ? "bg-primary" : "bg-transparent",
+                          isUnread ? "bg-red-500" : "bg-transparent",
                         )}
                       />
                       <span className="min-w-0 flex-1">

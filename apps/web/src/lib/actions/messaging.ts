@@ -227,13 +227,28 @@ export async function markConversationRead(conversationId: string): Promise<Mess
   if (!user) return { ok: false, message: "Inicia sesión." };
   if (!allowed || !admin) return { ok: false, message: "No autorizado." };
 
+  const now = new Date().toISOString();
   const { error } = await admin
     .from("messages")
-    .update({ read_at: new Date().toISOString() })
+    .update({ read_at: now })
     .eq("conversation_id", conversationId)
     .is("read_at", null)
     .or(`sender_id.neq.${user.id},sender_id.is.null`);
   if (error) return { ok: false, message: error.message };
+
+  // Sincroniza la campana: las notificaciones "nuevo mensaje" de esta
+  // conversación dejan de contar como sin leer.
+  try {
+    await admin
+      .from("notifications")
+      .update({ read_at: now })
+      .eq("user_id", user.id)
+      .eq("type", "message_new")
+      .eq("payload->>conversationId", conversationId)
+      .is("read_at", null);
+  } catch (err) {
+    console.error("[markConversationRead] notifications", err);
+  }
 
   revalidatePath("/agent/dashboard/messages");
   revalidatePath("/dashboard/messages");

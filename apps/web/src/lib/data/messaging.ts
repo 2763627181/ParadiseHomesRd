@@ -295,3 +295,18 @@ export async function getUnreadMessageCount(viewer: {
   for (const n of counts.values()) total += n;
   return total;
 }
+
+/**
+ * Igual que `getUnreadMessageCount` pero resolviendo el `agentId` a partir del
+ * perfil, para llamarlo desde endpoints ligeros que solo tienen `user.id`.
+ */
+export async function getUnreadMessageCountForProfile(userId: string): Promise<number> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return 0;
+  const { data: agent } = await admin
+    .from("agents")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  return getUnreadMessageCount({ userId, agentId: (agent as any)?.id ?? null });
+}
