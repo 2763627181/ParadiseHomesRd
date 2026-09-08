@@ -3,8 +3,10 @@ import { demoDevelopers } from "@paradise/database";
 
 import { getSessionUser } from "@/lib/auth";
 import { getDeveloperProjectRows } from "@/lib/data/developer-dashboard";
+import { getUnitInterestForDeveloper } from "@/lib/data/unit-interest";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { DeveloperProjectsTable } from "@/components/dashboard/developer-projects-table";
+import { UnitInterestTable } from "@/components/dashboard/unit-interest-table";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Proyectos · Desarrolladora", robots: { index: false } };
@@ -24,7 +26,10 @@ export default async function DeveloperProjectsPage() {
   const membership = user?.memberships.find((m) => m.organizationType === "developer");
   const developerId = membership?.organizationId ?? demoDevelopers[0]!.id;
 
-  const rows = await getDeveloperProjectRows(developerId);
+  const [rows, unitInterest] = await Promise.all([
+    getDeveloperProjectRows(developerId),
+    membership ? getUnitInterestForDeveloper(developerId) : Promise.resolve([]),
+  ]);
 
   return (
     <DashboardShell title="Desarrolladora" nav={NAV}>
@@ -37,6 +42,9 @@ export default async function DeveloperProjectsPage() {
         cargan con el equipo de Paradise por ahora.
       </p>
       <DeveloperProjectsTable rows={rows} />
+
+      <h2 className="mb-3 mt-8 text-sm font-semibold">Unidades con interés</h2>
+      <UnitInterestTable rows={unitInterest} />
     </DashboardShell>
   );
 }

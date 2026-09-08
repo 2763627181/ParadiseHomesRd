@@ -3,8 +3,10 @@ import { demoAgencies } from "@paradise/database";
 
 import { getSessionUser } from "@/lib/auth";
 import { getAgencyProjectRows } from "@/lib/data/agency-dashboard";
+import { getUnitInterestForAgency } from "@/lib/data/unit-interest";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
 import { AgencyProjectsTable } from "@/components/dashboard/agency-projects-table";
+import { UnitInterestTable } from "@/components/dashboard/unit-interest-table";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Proyectos · Inmobiliaria", robots: { index: false } };
@@ -28,7 +30,10 @@ export default async function AgencyProjectsPage() {
   const membership = user?.memberships.find((m) => m.organizationType === "agency");
   const agencyId = membership?.organizationId ?? demoAgencies[0]!.id;
 
-  const rows = await getAgencyProjectRows(agencyId);
+  const [rows, unitInterest] = await Promise.all([
+    getAgencyProjectRows(agencyId),
+    membership ? getUnitInterestForAgency(agencyId) : Promise.resolve([]),
+  ]);
 
   return (
     <DashboardShell title="Inmobiliaria" nav={NAV}>
@@ -40,6 +45,9 @@ export default async function AgencyProjectsPage() {
         {rows.length} proyecto{rows.length === 1 ? "" : "s"} publicados por tu inmobiliaria.
       </p>
       <AgencyProjectsTable rows={rows} />
+
+      <h2 className="mb-3 mt-8 text-sm font-semibold">Unidades con interés</h2>
+      <UnitInterestTable rows={unitInterest} />
     </DashboardShell>
   );
 }
