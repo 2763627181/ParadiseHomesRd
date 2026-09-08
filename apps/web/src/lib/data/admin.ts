@@ -6,6 +6,31 @@ import { getSupabaseAdminClient } from "@/lib/supabase/server";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+/** Cuentas con rol ADMIN o SUPER_ADMIN, para la gestión de equipo. */
+export async function getStaffUsers(): Promise<
+  { id: string; fullName: string; email: string | null; role: string }[]
+> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return [];
+  const { data, error } = await admin
+    .from("profiles")
+    .select("id, full_name, email, role")
+    .in("role", ["ADMIN", "SUPER_ADMIN"])
+    .order("role", { ascending: true })
+    .order("full_name", { ascending: true })
+    .limit(200);
+  if (error) {
+    console.error("[getStaffUsers]", error.message);
+    return [];
+  }
+  return (data ?? []).map((p: any) => ({
+    id: p.id,
+    fullName: p.full_name,
+    email: p.email,
+    role: p.role,
+  }));
+}
+
 /** Ids de entidades con una solicitud de verificación PENDING (opcionalmente de un solo tipo). */
 export async function getPendingVerificationTargetIds(
   targetType?: "agent" | "agency" | "developer" | "property",
