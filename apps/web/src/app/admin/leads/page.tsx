@@ -42,7 +42,7 @@ export default async function AdminLeadsPage({
         inmobiliarias.
       </p>
       <LeadsStatusFilter basePath="/admin/leads" active={status ?? "ALL"} />
-      <LeadsTable leads={leads} detailBase="/agent/dashboard/leads" />
+      <LeadsTable leads={leads} detailBase="/admin/leads" />
     </DashboardShell>
   );
 }

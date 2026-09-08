@@ -82,7 +82,7 @@ export function CommissionsTable({ rows }: { rows: ClosingRow[] }) {
                 <p className="font-medium">{row.contactName ?? "—"}</p>
                 <p className="text-xs text-muted-foreground">{row.closingCode}</p>
                 {row.leadId && (
-                  <Link href={`/agent/dashboard/leads/${row.leadId}`} className="text-xs text-primary hover:underline">
+                  <Link href={`/admin/leads/${row.leadId}`} className="text-xs text-primary hover:underline">
                     Ver lead
                   </Link>
                 )}

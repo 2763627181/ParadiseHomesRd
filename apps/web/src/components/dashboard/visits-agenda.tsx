@@ -40,10 +40,13 @@ export function VisitsAgenda({
   visits,
   showAgent = false,
   canManage,
+  leadBase = "/agent/dashboard/leads",
 }: {
   visits: AgentVisitRow[];
   showAgent?: boolean;
   canManage: boolean;
+  /** Base para el enlace "Ver lead" (varía entre el panel de asesor y el de admin). */
+  leadBase?: string;
 }) {
   const pending = visits.filter((v) => v.status === "REQUESTED");
   const upcoming = visits
@@ -66,7 +69,7 @@ export function VisitsAgenda({
       {pending.length > 0 && (
         <Section title={`Por confirmar (${pending.length})`}>
           {pending.map((v) => (
-            <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} />
+            <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} leadBase={leadBase} />
           ))}
         </Section>
       )}
@@ -77,7 +80,7 @@ export function VisitsAgenda({
             <div key={day} className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{day}</p>
               {dayVisits.map((v) => (
-                <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} />
+                <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} leadBase={leadBase} />
               ))}
             </div>
           ))}
@@ -87,7 +90,7 @@ export function VisitsAgenda({
       {past.length > 0 && (
         <Section title="Pasadas">
           {past.slice(0, 40).map((v) => (
-            <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} />
+            <VisitCard key={v.id} visit={v} showAgent={showAgent} canManage={canManage} leadBase={leadBase} />
           ))}
         </Section>
       )}
@@ -118,10 +121,12 @@ function VisitCard({
   visit,
   showAgent,
   canManage,
+  leadBase,
 }: {
   visit: AgentVisitRow;
   showAgent: boolean;
   canManage: boolean;
+  leadBase: string;
 }) {
   const router = useRouter();
   const [busy, setBusy] = React.useState(false);
@@ -195,7 +200,7 @@ function VisitCard({
             {visit.contactPhone}
           </a>
         )}
-        <Link href={`/agent/dashboard/leads/${visit.leadId}`} className="hover:text-foreground hover:underline">
+        <Link href={`${leadBase}/${visit.leadId}`} className="hover:text-foreground hover:underline">
           Ver lead {visit.leadCode ?? ""}
         </Link>
       </div>
