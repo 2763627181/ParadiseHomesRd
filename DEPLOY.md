@@ -87,6 +87,14 @@ Ejecuta en el **SQL Editor de Supabase**, una sola vez, en orden:
 - `packages/database/migrations/0011_realtime.sql` — habilita **tiempo real** para
   mensajería y notificaciones (sin esto, ambas funcionan igual pero se actualizan
   por sondeo cada 5–15 s en vez de al instante).
+- `packages/database/migrations/0012_agent_reviews.sql` — reseñas de asesores
+  (tabla `agent_reviews` + trigger que recalcula `rating_average`/`rating_count`).
+- `packages/database/migrations/0013_blog.sql` — blog (`/admin/content` para
+  redactar, `/blog` público). Antes de correrla, `/blog` muestra "sin artículos"
+  y el editor de admin avisa que falta la migración.
+
+Todas están concatenadas en `packages/database/schema.sql` si prefieres pegar
+solo lo nuevo desde ese archivo.
 
 ---
 

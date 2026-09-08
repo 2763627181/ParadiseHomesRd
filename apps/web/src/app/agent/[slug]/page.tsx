@@ -7,7 +7,9 @@ import { formatResponseTime, initials } from "@paradise/utils/format";
 import { agentContactMessage } from "@paradise/utils/whatsapp";
 
 import { getAgentBySlug, getAgentProperties, listAgents } from "@/lib/data/people";
+import { getAgentReviews } from "@/lib/data/reviews";
 import { env } from "@/lib/env";
+import { AgentReviews } from "@/components/agent/agent-reviews";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Container } from "@/components/layout/container";
 import { VerifiedBadge } from "@/components/common/verified-badge";
@@ -45,7 +47,10 @@ export default async function AgentPage({
   const { slug } = await params;
   const agent = await getAgentBySlug(slug);
   if (!agent) notFound();
-  const properties = await getAgentProperties(agent.id);
+  const [properties, reviews] = await Promise.all([
+    getAgentProperties(agent.id),
+    getAgentReviews(agent.id),
+  ]);
 
   return (
     <Container className="py-8 lg:py-12">
@@ -127,6 +132,14 @@ export default async function AgentPage({
               ))}
             </div>
           )}
+
+          <AgentReviews
+            agentId={agent.id}
+            agentSlug={slug}
+            reviews={reviews}
+            average={agent.ratingAverage}
+            count={agent.ratingCount}
+          />
         </div>
       </div>
     </Container>
