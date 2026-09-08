@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
+import { getSessionUser } from "@/lib/auth";
+import { getAnalytics } from "@/lib/data/analytics";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { DashboardComingSoon } from "@/components/dashboard/dashboard-coming-soon";
+import { AnalyticsRange } from "@/components/dashboard/analytics-range";
+import { AnalyticsView } from "@/components/dashboard/analytics-view";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Analytics · Asesor", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/agent/dashboard", icon: "overview" },
@@ -17,14 +22,38 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/agent/dashboard/settings", icon: "settings" },
 ];
 
-export default function AgentAnalyticsPage() {
+function parseRange(v?: string): number {
+  const n = Number(v);
+  return [7, 30, 90].includes(n) ? n : 30;
+}
+
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const range = parseRange((await searchParams).range);
+  const user = await getSessionUser();
+  const real = Boolean(user?.agentId);
+  const scope = { kind: "agent" as const, agentId: user?.agentId ?? "" };
+  const data = real ? await getAnalytics(scope, range) : null;
+
   return (
     <DashboardShell title="Asesor" nav={NAV}>
-      <h1 className="mb-5 text-xl font-semibold tracking-tight">Analytics</h1>
-      <DashboardComingSoon
-        title="Analíticas avanzadas"
-        description="Métricas detalladas de tus propiedades: vistas, conversión y comparativas por zona."
-      />
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold tracking-tight">Analytics</h1>
+          {!real && <Badge variant="warning">Vista de ejemplo</Badge>}
+        </div>
+        <AnalyticsRange active={range} />
+      </div>
+      {data ? (
+        <AnalyticsView data={data} />
+      ) : (
+        <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+          Inicia sesión con tu cuenta para ver tu analítica.
+        </p>
+      )}
     </DashboardShell>
   );
 }

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 
+import { getAnalytics } from "@/lib/data/analytics";
 import { DashboardShell, type DashboardNavItem } from "@/components/dashboard/dashboard-shell";
-import { DashboardComingSoon } from "@/components/dashboard/dashboard-coming-soon";
+import { AnalyticsRange } from "@/components/dashboard/analytics-range";
+import { AnalyticsView } from "@/components/dashboard/analytics-view";
 
 export const metadata: Metadata = { title: "Analytics · Admin", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const NAV: DashboardNavItem[] = [
   { label: "Resumen", href: "/admin", icon: "overview" },
@@ -23,14 +26,32 @@ const NAV: DashboardNavItem[] = [
   { label: "Ajustes", href: "/admin/settings", icon: "settings" },
 ];
 
-export default function AdminAnalyticsPage() {
+function parseRange(v?: string): number {
+  const n = Number(v);
+  return [7, 30, 90].includes(n) ? n : 30;
+}
+
+export default async function AdminAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const range = parseRange((await searchParams).range);
+  const data = await getAnalytics({ kind: "admin" }, range);
+
   return (
     <DashboardShell title="Admin" nav={NAV}>
-      <h1 className="mb-6 text-xl font-semibold tracking-tight">Analytics</h1>
-      <DashboardComingSoon
-        title="Analytics avanzado"
-        description="El Resumen ya muestra embudo de conversión, leads por día y por canal. Esta sección agregará cohortes, atribución multi-touch y reportes exportables."
-      />
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold tracking-tight">Analytics</h1>
+        <AnalyticsRange active={range} />
+      </div>
+      {data ? (
+        <AnalyticsView data={data} showAgents showTraffic />
+      ) : (
+        <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+          Conecta Supabase para ver analítica real.
+        </p>
+      )}
     </DashboardShell>
   );
 }
