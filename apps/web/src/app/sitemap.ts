@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/partners",
     "/partners/apply",
     "/mortgage-calculator",
+    "/market",
     "/blog",
     "/faq",
     "/about",
