@@ -10,7 +10,7 @@ import { sbGetFeaturedLocations, sbGetLocationBySlug } from "./supabase/catalog"
 export const getFeaturedLocations = cache(async (): Promise<Location[]> => {
   if (isSupabaseConfigured) {
     const rows = await sbGetFeaturedLocations();
-    if (rows && rows.length) return rows;
+    if (rows) return rows;
   }
   return demoFeaturedLocations();
 });

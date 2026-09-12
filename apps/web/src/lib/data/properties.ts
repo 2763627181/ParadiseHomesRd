@@ -33,7 +33,10 @@ export interface PropertySearchResponse {
 export const getFeaturedProperties = cache(async (limit = 8): Promise<PropertySummary[]> => {
   if (isSupabaseConfigured) {
     const rows = await sbGetFeaturedProperties(limit);
-    if (rows && rows.length) return rows;
+    // `rows` es `null` si la consulta falló (sin backend real disponible);
+    // un array vacío es una respuesta real (catálogo sin propiedades) y no
+    // debe disfrazarse con datos demo.
+    if (rows) return rows;
   }
   return demoFeaturedProperties(limit);
 });
@@ -76,7 +79,7 @@ export async function getSimilarProperties(
 ): Promise<PropertySummary[]> {
   if (isSupabaseConfigured) {
     const rows = await sbSimilarProperties(property, limit);
-    if (rows && rows.length) return rows;
+    if (rows) return rows;
   }
   return demoSimilarProperties(property, limit);
 }
@@ -84,7 +87,7 @@ export async function getSimilarProperties(
 export async function getAllPropertySlugs(): Promise<string[]> {
   if (isSupabaseConfigured) {
     const supabaseSlugs = await sbAllPublishedSlugs();
-    if (supabaseSlugs && supabaseSlugs.length) return supabaseSlugs;
+    if (supabaseSlugs) return supabaseSlugs;
   }
   return demoAllPropertySlugs();
 }

@@ -4,20 +4,22 @@ import { cache } from "react";
 import type { Project } from "@paradise/types";
 
 import { isSupabaseConfigured } from "@/lib/env";
-import { demoFeaturedProjects, demoListProjects, demoProjectBySlug } from "./demo-store";
+import { demoListProjects, demoProjectBySlug } from "./demo-store";
 import { sbGetProjectBySlug, sbListProjects } from "./supabase/catalog";
 
 export const listProjects = cache(async (): Promise<Project[]> => {
   if (isSupabaseConfigured) {
     const rows = await sbListProjects();
-    if (rows && rows.length) return rows;
+    // `null` => sin backend real o error; un array vacío es una respuesta
+    // real (catálogo sin proyectos) y no debe disfrazarse con datos demo.
+    if (rows) return rows;
   }
   return demoListProjects();
 });
 
 export const getFeaturedProjects = cache(async (limit = 6): Promise<Project[]> => {
   const all = await listProjects();
-  return all.length ? all.slice(0, limit) : demoFeaturedProjects(limit);
+  return all.slice(0, limit);
 });
 
 export const getProjectBySlug = cache(async (slug: string): Promise<Project | null> => {
