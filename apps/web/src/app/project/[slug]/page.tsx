@@ -22,8 +22,7 @@ import { UnitTable } from "@/components/project/unit-table";
 import { PaymentPlan } from "@/components/project/payment-plan";
 import { VerifiedBadge } from "@/components/common/verified-badge";
 import { FavoriteButton } from "@/components/common/favorite-button";
-import { WhatsappButton } from "@/components/lead/whatsapp-button";
-import { LeadForm } from "@/components/lead/lead-form";
+import { ProjectLeadCard } from "@/components/project/project-lead-card";
 
 export const revalidate = 300;
 
@@ -231,28 +230,20 @@ export default async function ProjectPage({
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-2xl border border-border/70 bg-card p-5 shadow-card">
-              <p className="text-sm text-muted-foreground">Precios desde</p>
-              <p className="text-2xl font-semibold">
-                {formatPriceRange(project.priceFrom.amount, null, project.priceFrom.currency)}
-              </p>
-              <div className="mt-4 space-y-2">
-                <WhatsappButton
-                  phone={waPhone}
-                  message={propertyInquiryMessage({
-                    code: project.code,
-                    title: project.name,
-                    url: `${env.APP_URL}${ROUTES.project(project.slug)}`,
-                  })}
-                  label="Consultar por WhatsApp"
-                  variant="default"
-                  projectId={project.id}
-                />
-              </div>
-              <Separator className="my-4" />
-              <LeadForm
-                compact
+              <ProjectLeadCard
+                priceFrom={project.priceFrom.amount}
+                priceTo={project.priceTo?.amount ?? null}
+                currency={project.priceFrom.currency}
+                waPhone={waPhone}
+                waMessage={propertyInquiryMessage({
+                  code: project.code,
+                  title: project.name,
+                  url: `${env.APP_URL}${ROUTES.project(project.slug)}`,
+                })}
                 projectId={project.id}
-                defaultMessage={`Hola, quiero información sobre el proyecto ${project.name} (${project.code}).`}
+                projectCode={project.code}
+                projectName={project.name}
+                coverImageUrl={project.coverImage?.url}
               />
             </div>
           </aside>
