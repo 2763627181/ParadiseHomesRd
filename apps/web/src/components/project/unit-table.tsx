@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { UNIT_STATUS, type UnitStatus } from "@paradise/config";
 import { formatArea } from "@paradise/utils/format";
 import { formatPrice } from "@paradise/utils/currency";
@@ -37,8 +38,10 @@ export function UnitTable({
 }) {
   const [onlyAvailable, setOnlyAvailable] = React.useState(false);
   const [sort, setSort] = React.useState<"price" | "area" | "level">("price");
+  const [page, setPage] = React.useState(0);
+  const PAGE_SIZE = 20;
 
-  const rows = React.useMemo(() => {
+  const filtered = React.useMemo(() => {
     let list = [...units];
     if (onlyAvailable) list = list.filter((u) => u.status === UNIT_STATUS.AVAILABLE);
     list.sort((a, b) => {
@@ -48,6 +51,14 @@ export function UnitTable({
     });
     return list;
   }, [units, onlyAvailable, sort]);
+
+  // Proyectos con cientos de unidades no caben en una sola tabla: se pagina en
+  // vez de renderizar todas las filas (y sus diálogos) de una vez.
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const rows = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
+  React.useEffect(() => setPage(0), [onlyAvailable, sort]);
 
   return (
     <div>
@@ -125,6 +136,38 @@ export function UnitTable({
           </tbody>
         </table>
       </div>
+
+      {pageCount > 1 && (
+        <div className="mt-3 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>
+            {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, filtered.length)} de{" "}
+            {filtered.length} unidades
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              disabled={safePage === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              <ChevronLeftIcon className="size-4" />
+            </Button>
+            <span className="px-1 tabular-nums">
+              {safePage + 1} / {pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              disabled={safePage >= pageCount - 1}
+              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            >
+              <ChevronRightIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
