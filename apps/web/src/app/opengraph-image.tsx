@@ -28,7 +28,7 @@ export default function OgImage() {
 
         <div style={{ display: "flex", flexDirection: "column", color: "#F4F8F5" }}>
           <div style={{ display: "flex", fontSize: 66, fontWeight: 600, letterSpacing: -2 }}>
-            Encuentra tu lugar en
+            Encuentra tu hogar en
           </div>
           <div style={{ display: "flex", fontSize: 66, fontWeight: 600, letterSpacing: -2 }}>
             República Dominicana.

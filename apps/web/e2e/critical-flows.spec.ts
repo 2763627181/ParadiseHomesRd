@@ -4,7 +4,7 @@ test.describe("Flujos críticos", () => {
   test("home carga y muestra el hero", async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: /Encuentra tu lugar en República Dominicana/i }),
+      page.getByRole("heading", { name: /Encuentra tu hogar en República Dominicana/i }),
     ).toBeVisible();
   });
 

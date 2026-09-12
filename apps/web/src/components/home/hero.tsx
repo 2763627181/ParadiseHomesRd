@@ -26,7 +26,7 @@ export function Hero() {
         </p>
 
         <h1 className="max-w-3xl text-balance text-display text-foreground">
-          Encuentra tu lugar en República Dominicana.
+          Encuentra tu hogar en República Dominicana.
         </h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">
           Explora propiedades verificadas para comprar, alquilar o invertir. Conecta directo con
