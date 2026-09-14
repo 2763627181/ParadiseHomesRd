@@ -8,6 +8,7 @@ import { agentContactMessage } from "@paradise/utils/whatsapp";
 import {
   getAgencyAgents,
   getAgencyBySlug,
+  getAgencyProjects,
   getAgencyProperties,
   listAgencies,
 } from "@/lib/data/people";
@@ -18,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { VerifiedBadge } from "@/components/common/verified-badge";
 import { WhatsappButton } from "@/components/lead/whatsapp-button";
 import { PropertyCard } from "@/components/property/property-card";
+import { ProjectCard } from "@/components/project/project-card";
 import { AgentCard } from "@/components/agent/agent-card";
 import { EmptyState } from "@/components/common/empty-state";
 
@@ -51,8 +53,9 @@ export default async function AgencyPage({
   const agency = await getAgencyBySlug(slug);
   if (!agency) notFound();
 
-  const [properties, agents] = await Promise.all([
+  const [properties, projects, agents] = await Promise.all([
     getAgencyProperties(agency.id),
+    getAgencyProjects(slug),
     getAgencyAgents(slug),
   ]);
 
@@ -123,6 +126,18 @@ export default async function AgencyPage({
         )}
 
         <Separator className="my-8" />
+
+        {projects.length > 0 && (
+          <>
+            <h2 className="mb-4 text-lg font-semibold">Proyectos ({projects.length})</h2>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+            <Separator className="my-8" />
+          </>
+        )}
 
         <h2 className="mb-4 text-lg font-semibold">Propiedades ({properties.length})</h2>
         {properties.length === 0 ? (

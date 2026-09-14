@@ -81,6 +81,12 @@ export const getAgencyAgents = cache(async (agencySlug: string): Promise<Agent[]
   return scoped.length ? scoped : demoAgencyAgents(agencySlug);
 });
 
+/** Proyectos que esta inmobiliaria comercializa (aparte de las fichas sueltas en `properties`). */
+export const getAgencyProjects = cache(async (agencySlug: string): Promise<Project[]> => {
+  const all = await listProjects();
+  return all.filter((p) => p.agency?.slug === agencySlug);
+});
+
 // ── Desarrolladoras ────────────────────────────────────────────────────────
 export const getDeveloperBySlug = cache(async (slug: string): Promise<Developer | null> => {
   if (isSupabaseConfigured) {
