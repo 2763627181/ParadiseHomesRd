@@ -50,6 +50,12 @@ export const getAgentProperties = cache(async (agentId: string): Promise<Propert
   return demoAgentProperties(agentId);
 });
 
+/** Proyectos (preventa) que este asesor tiene asignados. */
+export const getAgentProjects = cache(async (agentId: string): Promise<Project[]> => {
+  const all = await listProjects();
+  return all.filter((p) => p.agent?.id === agentId);
+});
+
 // ── Agencias ───────────────────────────────────────────────────────────────
 export const listAgencies = cache(async (): Promise<Agency[]> => {
   if (isSupabaseConfigured) {

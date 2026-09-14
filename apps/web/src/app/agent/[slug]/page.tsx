@@ -6,7 +6,7 @@ import { ROUTES } from "@paradise/config";
 import { formatResponseTime, initials } from "@paradise/utils/format";
 import { agentContactMessage } from "@paradise/utils/whatsapp";
 
-import { getAgentBySlug, getAgentProperties, listAgents } from "@/lib/data/people";
+import { getAgentBySlug, getAgentProjects, getAgentProperties, listAgents } from "@/lib/data/people";
 import { getAgentReviews } from "@/lib/data/reviews";
 import { env } from "@/lib/env";
 import { AgentReviews } from "@/components/agent/agent-reviews";
@@ -16,6 +16,7 @@ import { Container } from "@/components/layout/container";
 import { VerifiedBadge } from "@/components/common/verified-badge";
 import { WhatsappButton } from "@/components/lead/whatsapp-button";
 import { PropertyCard } from "@/components/property/property-card";
+import { ProjectCard } from "@/components/project/project-card";
 import { EmptyState } from "@/components/common/empty-state";
 
 export const revalidate = 600;
@@ -48,8 +49,9 @@ export default async function AgentPage({
   const { slug } = await params;
   const agent = await getAgentBySlug(slug);
   if (!agent) notFound();
-  const [properties, reviews] = await Promise.all([
+  const [properties, projects, reviews] = await Promise.all([
     getAgentProperties(agent.id),
+    getAgentProjects(agent.id),
     getAgentReviews(agent.id),
   ]);
 
@@ -131,6 +133,17 @@ export default async function AgentPage({
             <section className="mb-8">
               <h2 className="mb-2 text-lg font-semibold">Sobre {agent.fullName.split(" ")[0]}</h2>
               <p className="text-[0.95rem] leading-relaxed text-muted-foreground">{agent.bio}</p>
+            </section>
+          )}
+
+          {projects.length > 0 && (
+            <section className="mb-8">
+              <h2 className="mb-4 text-lg font-semibold">Proyectos ({projects.length})</h2>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
             </section>
           )}
 
