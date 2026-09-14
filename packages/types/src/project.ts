@@ -1,7 +1,7 @@
 import type { Currency, ProjectStatus, PropertyType, UnitStatus } from "@paradise/config";
 import type { ImageAsset, ISODateString, Money, UUID, VideoAsset } from "./common";
 import type { PropertyLocation } from "./location";
-import type { Developer, DeveloperSummary } from "./people";
+import type { Agency, Developer, DeveloperSummary } from "./people";
 
 export interface ProjectSummary {
   id: UUID;
@@ -69,6 +69,7 @@ export interface Project extends ProjectSummary {
   units: ProjectUnit[];
   paymentPlans: PaymentPlan[];
   developer: Developer | null;
+  agency: Agency | null;
   deliveredUnits: number;
   isDemo: boolean;
   createdAt: ISODateString;

@@ -71,7 +71,7 @@ export default async function ProjectPage({
     .filter(Boolean)
     .join(", ");
   const defaultPlan = project.paymentPlans.find((p) => p.isDefault) ?? project.paymentPlans[0];
-  const waPhone = project.developer?.whatsapp ?? env.ADMIN_WHATSAPP;
+  const waPhone = project.developer?.whatsapp ?? project.agency?.whatsapp ?? env.ADMIN_WHATSAPP;
 
   return (
     <>
@@ -145,26 +145,52 @@ export default async function ProjectPage({
                   <p key={i}>{p}</p>
                 ))}
               </div>
-              {project.developer && (
-                <div className="mt-4 flex items-center gap-3 rounded-lg border border-border/70 p-3">
-                  {project.developer.logoUrl && (
-                    <Image
-                      src={project.developer.logoUrl}
-                      alt={project.developer.name}
-                      width={40}
-                      height={40}
-                      className="size-10 rounded-md object-cover"
-                    />
+              {(project.developer || project.agency) && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {project.developer && (
+                    <div className="flex flex-1 min-w-[14rem] items-center gap-3 rounded-lg border border-border/70 p-3">
+                      {project.developer.logoUrl && (
+                        <Image
+                          src={project.developer.logoUrl}
+                          alt={project.developer.name}
+                          width={40}
+                          height={40}
+                          className="size-10 rounded-md object-cover"
+                        />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium">{project.developer.name}</p>
+                        <Link
+                          href={ROUTES.developer(project.developer.slug)}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ver desarrolladora
+                        </Link>
+                      </div>
+                    </div>
                   )}
-                  <div>
-                    <p className="text-sm font-medium">{project.developer.name}</p>
-                    <Link
-                      href={ROUTES.developer(project.developer.slug)}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Ver desarrolladora
-                    </Link>
-                  </div>
+                  {project.agency && (
+                    <div className="flex flex-1 min-w-[14rem] items-center gap-3 rounded-lg border border-border/70 p-3">
+                      {project.agency.logoUrl && (
+                        <Image
+                          src={project.agency.logoUrl}
+                          alt={project.agency.name}
+                          width={40}
+                          height={40}
+                          className="size-10 rounded-md object-cover"
+                        />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium">{project.agency.name}</p>
+                        <Link
+                          href={ROUTES.agency(project.agency.slug)}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ver inmobiliaria
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </section>

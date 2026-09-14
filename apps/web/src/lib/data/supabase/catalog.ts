@@ -9,6 +9,31 @@ import type {
   PropertySummary,
 } from "@paradise/types";
 
+function mapProjectAgency(row: any): Agency | null {
+  if (!row) return null;
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    logoUrl: row.logo_url,
+    coverImageUrl: row.cover_image_url,
+    isVerified: row.is_verified,
+    city: null,
+    activeListings: 0,
+    projectCount: 0,
+    agentCount: 0,
+    description: row.description,
+    website: row.website,
+    phone: row.phone,
+    whatsapp: row.whatsapp,
+    email: row.email,
+    areas: row.areas ?? [],
+    socialLinks: row.social_links ?? {},
+    foundedYear: row.founded_year ?? null,
+    createdAt: row.created_at,
+  };
+}
+
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { viewRowToPropertySummary } from "@/lib/data/mappers";
 
@@ -17,6 +42,7 @@ import { viewRowToPropertySummary } from "@/lib/data/mappers";
 const PROJECT_SELECT = `
   *,
   developer:developers(*),
+  agency:agencies(*),
   sector:locations!projects_sector_id_fkey(name, slug),
   city:locations!projects_city_id_fkey(name, slug),
   province:locations!projects_province_id_fkey(name, slug),
@@ -108,6 +134,7 @@ function mapProject(row: any): Project {
     availableUnits: units.filter((u: any) => u.status === "AVAILABLE").length,
     totalUnits: units.length,
     developer: mapDeveloper(row.developer),
+    agency: mapProjectAgency(row.agency),
     isVerified: row.is_verified,
     isFeatured: row.is_featured,
     description: row.description ?? "",
