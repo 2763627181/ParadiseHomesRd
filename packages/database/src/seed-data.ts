@@ -595,6 +595,7 @@ function buildProject(seq: number, spec: ProjectSpec): Project {
       areas: spec.developer.areas,
     },
     agency: null,
+    agent: null,
     isVerified: true,
     isFeatured: Boolean(spec.featured),
     description: `${spec.name} es un desarrollo de ${spec.developer.name} en ${sector.name}. ${spec.towers.length} ${spec.towers.length === 1 ? "etapa" : "torres/bloques"}, ${units.length} unidades de ${spec.beds[0]} a ${spec.beds[1]} habitaciones, con amenidades completas y planes de pago flexibles durante la construcción.\n\nProyecto DEMO de Paradise Homes RD.`,

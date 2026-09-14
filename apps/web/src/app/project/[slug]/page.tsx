@@ -71,7 +71,11 @@ export default async function ProjectPage({
     .filter(Boolean)
     .join(", ");
   const defaultPlan = project.paymentPlans.find((p) => p.isDefault) ?? project.paymentPlans[0];
-  const waPhone = project.developer?.whatsapp ?? project.agency?.whatsapp ?? env.ADMIN_WHATSAPP;
+  const waPhone =
+    project.agent?.whatsapp ??
+    project.developer?.whatsapp ??
+    project.agency?.whatsapp ??
+    env.ADMIN_WHATSAPP;
 
   return (
     <>
@@ -270,6 +274,15 @@ export default async function ProjectPage({
                 projectCode={project.code}
                 projectName={project.name}
                 coverImageUrl={project.coverImage?.url}
+                agent={
+                  project.agent && {
+                    id: project.agent.id,
+                    slug: project.agent.slug,
+                    fullName: project.agent.fullName,
+                    avatarUrl: project.agent.avatarUrl,
+                    isVerified: project.agent.isVerified,
+                  }
+                }
               />
             </div>
           </aside>
