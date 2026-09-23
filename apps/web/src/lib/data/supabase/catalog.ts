@@ -34,7 +34,7 @@ function mapProjectAgency(row: any): Agency | null {
   };
 }
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient } from "@/lib/supabase/server";
 import { viewRowToPropertySummary } from "@/lib/data/mappers";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -226,7 +226,7 @@ function mapAgency(row: any): Agency {
 
 // ── Projects ───────────────────────────────────────────────────────────────
 export async function sbListProjects(): Promise<Project[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("projects")
@@ -242,7 +242,7 @@ export async function sbListProjects(): Promise<Project[] | null> {
 }
 
 export async function sbGetProjectBySlug(slug: string): Promise<Project | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined;
   const { data, error } = await supabase
     .from("projects")
@@ -259,7 +259,7 @@ export async function sbGetProjectBySlug(slug: string): Promise<Project | null |
 
 // ── Agents ─────────────────────────────────────────────────────────────────
 export async function sbListAgents(): Promise<Agent[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("agents")
@@ -271,7 +271,7 @@ export async function sbListAgents(): Promise<Agent[] | null> {
 }
 
 export async function sbGetAgentBySlug(slug: string): Promise<Agent | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined;
   const { data, error } = await supabase
     .from("agents")
@@ -284,7 +284,7 @@ export async function sbGetAgentBySlug(slug: string): Promise<Agent | null | und
 
 // ── Agencies ───────────────────────────────────────────────────────────────
 export async function sbListAgencies(): Promise<Agency[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("agencies")
@@ -296,7 +296,7 @@ export async function sbListAgencies(): Promise<Agency[] | null> {
 }
 
 export async function sbGetAgencyBySlug(slug: string): Promise<Agency | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined;
   const { data, error } = await supabase
     .from("agencies")
@@ -308,7 +308,7 @@ export async function sbGetAgencyBySlug(slug: string): Promise<Agency | null | u
 }
 
 export async function sbGetDeveloperBySlug(slug: string): Promise<Developer | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined;
   const { data, error } = await supabase.from("developers").select("*").eq("slug", slug).maybeSingle();
   if (error) return undefined;
@@ -320,7 +320,7 @@ export async function sbPropertiesBy(
   column: "agent_id" | "agency_id" | "developer_id" | "project_id",
   id: string,
 ): Promise<PropertySummary[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("property_summaries")
@@ -351,7 +351,7 @@ function mapLocation(row: any): Location {
 }
 
 export async function sbGetFeaturedLocations(): Promise<Location[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("locations")
@@ -363,7 +363,7 @@ export async function sbGetFeaturedLocations(): Promise<Location[] | null> {
 }
 
 export async function sbGetLocationBySlug(slug: string): Promise<Location | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined;
   const { data, error } = await supabase.from("locations").select("*").eq("slug", slug).maybeSingle();
   if (error) return undefined;

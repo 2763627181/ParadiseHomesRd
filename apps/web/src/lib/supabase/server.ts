@@ -9,7 +9,7 @@ import { env, isSupabaseConfigured, serverEnv } from "@/lib/env";
 let publicClient: SupabaseClient | null = null;
 
 /** Cliente anónimo sin cookies. Seguro en cualquier contexto (build, generateStaticParams). */
-function getSupabasePublicClient(): SupabaseClient | null {
+export function getSupabasePublicClient(): SupabaseClient | null {
   if (!isSupabaseConfigured) return null;
   publicClient ??= createClient(env.SUPABASE_URL!, env.SUPABASE_ANON_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },

@@ -5,7 +5,7 @@ import type { PropertyStatus } from "@paradise/config";
 import type { Property, PropertySummary } from "@paradise/types";
 import type { ParsedPropertySearchParams } from "@paradise/validation";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient } from "@/lib/supabase/server";
 import { rowToImageAsset, viewRowToPropertySummary } from "@/lib/data/mappers";
 import type { PropertySearchResponse } from "@/lib/data/properties";
 
@@ -35,7 +35,7 @@ function expandLocationSlugs(slugs: string[]): string[] {
 export async function sbSearchProperties(
   params: ParsedPropertySearchParams,
 ): Promise<PropertySearchResponse | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
 
   let q = supabase
@@ -159,7 +159,7 @@ export async function sbSimilarProperties(
   property: Property,
   limit: number,
 ): Promise<PropertySummary[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
 
   let q = supabase
@@ -195,7 +195,7 @@ export async function sbSimilarProperties(
 }
 
 export async function sbGetFeaturedProperties(limit: number): Promise<PropertySummary[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("property_summaries")
@@ -211,7 +211,7 @@ export async function sbGetFeaturedProperties(limit: number): Promise<PropertySu
 }
 
 export async function sbAllPublishedSlugs(): Promise<string[] | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("properties")
@@ -358,7 +358,7 @@ function mapPropertyRow(p: any): Property {
 }
 
 export async function sbGetPropertyBySlug(slug: string): Promise<Property | null | undefined> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return undefined; // undefined => "no backend, usa demo"
 
   const { data: p, error } = await supabase
@@ -375,7 +375,7 @@ export async function sbGetPropertyBySlug(slug: string): Promise<Property | null
 /** Resuelve varias propiedades por id (favoritos, comparador, colecciones). */
 export async function sbGetPropertiesByIds(ids: string[]): Promise<Property[] | null> {
   if (!ids.length) return [];
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
 
   const { data, error } = await supabase
@@ -409,7 +409,7 @@ export interface PropertyForEdit {
  * también sirve como señal de "no autorizado o no existe".
  */
 export async function sbGetPropertyForEdit(id: string): Promise<PropertyForEdit | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
 
   const { data: p, error } = await supabase

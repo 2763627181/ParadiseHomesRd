@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient } from "@/lib/supabase/server";
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Insights del mercado — SOLO con datos reales de las propiedades publicadas
@@ -39,7 +39,7 @@ export interface MarketInsights {
 
 
 export async function getMarketInsights(): Promise<MarketInsights | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
 
   const { data, error } = await supabase

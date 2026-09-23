@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getSupabaseServerClient, getSupabaseAdminClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient, getSupabaseAdminClient } from "@/lib/supabase/server";
 
 
 export interface BlogPostSummary {
@@ -54,7 +54,7 @@ const isMissingTable = (msg: string) => /does not exist|relation .* does not exi
 
 /** Artículos publicados (portada del blog). */
 export async function getPublishedPosts(): Promise<BlogPostSummary[]> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("blog_posts")
@@ -70,7 +70,7 @@ export async function getPublishedPosts(): Promise<BlogPostSummary[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return null;
   const { data, error } = await supabase.from("blog_posts").select(FULL_COLS).eq("slug", slug).maybeSingle();
   if (error || !data) return null;
@@ -78,7 +78,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 }
 
 export async function getPublishedSlugs(): Promise<string[]> {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabasePublicClient();
   if (!supabase) return [];
   const { data, error } = await supabase.from("blog_posts").select("slug").eq("status", "PUBLISHED").limit(500);
   if (error) return [];
