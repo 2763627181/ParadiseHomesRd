@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Image from "next/image";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeftIcon, ChevronRightIcon, ExpandIcon, XIcon } from "lucide-react";
 import type { ImageAsset } from "@paradise/types";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export function PropertyGallery({
   images,
@@ -112,13 +112,19 @@ export function PropertyGallery({
         </span>
       </div>
 
-      {/* Lightbox */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          showClose={false}
-          className="inset-0 top-0 left-0 h-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-none border-0 bg-black/95 p-0"
-        >
-          <div className="relative flex h-[100dvh] flex-col">
+      {/* Lightbox: primitivos de Radix directos, sin heredar las clases de
+          centrado del Dialog compartido (esas dejaban el panel angosto y
+          descentrado en Safari/iOS, tapando el botón de cerrar). */}
+      <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/95 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <DialogPrimitive.Content
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            className="fixed inset-0 z-50 flex flex-col bg-black/95 outline-none"
+          >
+            <DialogPrimitive.Title className="sr-only">
+              {title} — foto {active + 1} de {pics.length}
+            </DialogPrimitive.Title>
             <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] text-white">
               <span className="text-sm">
                 {active + 1} / {pics.length}
@@ -132,7 +138,7 @@ export function PropertyGallery({
                 <XIcon className="size-5" />
               </button>
             </div>
-            <div className="relative flex-1">
+            <div className="relative min-h-0 flex-1">
               {pics[active] && (
                 <Image
                   src={pics[active].url}
@@ -163,7 +169,7 @@ export function PropertyGallery({
                 </>
               )}
             </div>
-            <div className="no-scrollbar flex gap-2 overflow-x-auto p-4">
+            <div className="no-scrollbar flex shrink-0 gap-2 overflow-x-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {pics.map((pic, i) => (
                 <button
                   key={pic.id}
@@ -178,9 +184,9 @@ export function PropertyGallery({
                 </button>
               ))}
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </>
   );
 }
