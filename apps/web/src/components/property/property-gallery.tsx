@@ -116,15 +116,20 @@ export function PropertyGallery({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showClose={false}
-          className="h-[100dvh] max-w-none rounded-none border-0 bg-black/95 p-0"
+          className="inset-0 top-0 left-0 h-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-none border-0 bg-black/95 p-0"
         >
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-center justify-between p-4 text-white">
+          <div className="relative flex h-[100dvh] flex-col">
+            <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] text-white">
               <span className="text-sm">
                 {active + 1} / {pics.length}
               </span>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar">
-                <XIcon className="size-6" />
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Cerrar"
+                className="flex size-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm"
+              >
+                <XIcon className="size-5" />
               </button>
             </div>
             <div className="relative flex-1">
